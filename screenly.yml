@@ -1,0 +1,70 @@
+---
+syntax: manifest_v1
+description: Display Shopify store sales metrics on your Screenly digital signage screens
+icon: https://playground.srly.io/edge-apps/icons/shopify.svg
+author: Screenly, Inc.
+categories:
+  - Dashboards
+ready_signal: true
+settings:
+  access_token:
+    type: secret
+    title: Access Token
+    optional: true
+    help_text:
+      properties:
+        help_text: For testing only. In production, the access token is fetched dynamically via the Screenly OAuth service.
+        type: oauth:shopify:access_token
+      schema_version: 1
+  api_version:
+    type: string
+    default_value: '2026-07'
+    title: API Version
+    optional: true
+    help_text:
+      properties:
+        advanced: true
+        help_text: The Shopify Admin API version used for GraphQL requests.
+      schema_version: 1
+  display_errors:
+    type: string
+    default_value: 'false'
+    title: Display Errors
+    optional: true
+    help_text:
+      properties:
+        advanced: true
+        help_text: For debugging purposes to display errors on the screen.
+        type: boolean
+      schema_version: 1
+  override_locale:
+    type: string
+    default_value: ''
+    title: Override Locale
+    optional: true
+    help_text: |
+      Override the default locale with a supported language code (e.g., en, fr, de). Defaults to English if not specified.
+  override_timezone:
+    type: string
+    default_value: ''
+    title: Override Timezone
+    optional: true
+    help_text: |
+      Override the default timezone with a supported timezone identifier (e.g., Europe/London, America/New_York). Defaults to the system timezone if left blank.
+  refresh_interval:
+    type: string
+    default_value: '300'
+    title: Refresh Interval (seconds)
+    optional: true
+    help_text:
+      properties:
+        advanced: true
+        help_text: How often to refresh Shopify data. Defaults to 300 seconds.
+        type: number
+      schema_version: 1
+  shop_domain:
+    type: string
+    title: Shop Domain
+    optional: false
+    help_text: |
+      The myshopify.com domain of the store to display data from (e.g. my-store.myshopify.com). In production, this is provided by the Shopify integration.
