@@ -5,6 +5,9 @@ import {
   RECENT_ORDERS_QUERY,
   SHOP_QUERY,
   SHOPIFYQL_QUERY,
+  salesByProductQuery,
+  salesBreakdownQuery,
+  salesOverTimeQuery,
   salesQuery,
   sessionsQuery,
 } from './constants'
@@ -170,5 +173,47 @@ export async function fetchSessionsSummary(
     apiVersion,
     token,
     sessionsQuery(range),
+  )
+}
+
+export async function fetchSalesOverTime(
+  shopDomain: string,
+  apiVersion: string,
+  token: string,
+  range: DateRange,
+): Promise<ShopifyqlTableData | null> {
+  return fetchShopifyqlTable(
+    shopDomain,
+    apiVersion,
+    token,
+    salesOverTimeQuery(range),
+  )
+}
+
+export async function fetchSalesByProduct(
+  shopDomain: string,
+  apiVersion: string,
+  token: string,
+  range: DateRange,
+): Promise<ShopifyqlTableData | null> {
+  return fetchShopifyqlTable(
+    shopDomain,
+    apiVersion,
+    token,
+    salesByProductQuery(range),
+  )
+}
+
+export async function fetchSalesBreakdown(
+  shopDomain: string,
+  apiVersion: string,
+  token: string,
+  range: DateRange,
+): Promise<ShopifyqlTableData | null> {
+  return fetchShopifyqlTable(
+    shopDomain,
+    apiVersion,
+    token,
+    salesBreakdownQuery(range),
   )
 }

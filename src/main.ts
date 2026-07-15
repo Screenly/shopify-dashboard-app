@@ -11,6 +11,9 @@ import {
 } from '@screenly/edge-apps'
 import {
   fetchRecentOrders,
+  fetchSalesByProduct,
+  fetchSalesBreakdown,
+  fetchSalesOverTime,
   fetchSalesSummary,
   fetchSessionsSummary,
   fetchShopInfo,
@@ -26,12 +29,22 @@ import {
 } from './app'
 import { getCredentials, withFreshCredentials } from './auth'
 import type { RuntimeState, ShopifyCredentials } from './auth'
-import type { DateRange } from './constants'
+import type { ChartType, DateRange, ViewName } from './constants'
+import {
+  renderSalesBreakdown,
+  renderSalesByProduct,
+  renderSalesOverTime,
+  showView,
+} from './views'
 import {
   DEFAULT_API_VERSION,
+  DEFAULT_CHART_TYPE,
   DEFAULT_DATE_RANGE,
   DEFAULT_REFRESH_INTERVAL,
+  DEFAULT_VIEW,
+  isChartType,
   isDateRange,
+  isView,
 } from './constants'
 
 interface DashboardContext {
@@ -41,25 +54,147 @@ interface DashboardContext {
 }
 
 let currentRange: DateRange = DEFAULT_DATE_RANGE
+let currentView: ViewName = DEFAULT_VIEW
+let currentChartType: ChartType = DEFAULT_CHART_TYPE
 
-async function loadDashboard(
-  credentials: ShopifyCredentials,
-  context: DashboardContext,
-): Promise<void> {
-  const { token, shopDomain } = credentials
-  const { apiVersion, locale, timezone } = context
-  const range = currentRange
+async function loadSummaryView(
+  shopDomain: string,
+  apiVersion: string,
+  token: string,
+  range: DateRange,
+  locale: string,
+  timezone: string,
+) {
   const [shopInfo, salesTable, sessionsTable, orders] = await Promise.all([
     fetchShopInfo(shopDomain, apiVersion, token),
     fetchSalesSummary(shopDomain, apiVersion, token, range),
     fetchSessionsSummary(shopDomain, apiVersion, token, range),
     fetchRecentOrders(shopDomain, apiVersion, token),
   ])
+  return {
+    shopInfo,
+    render: () => {
+      renderKpiLabels(range)
+      renderKpis(
+        extractKpis(salesTable, sessionsTable, shopInfo.currencyCode, locale),
+      )
+      renderOrders(orders, locale, timezone)
+    },
+  }
+}
 
-  if (range !== currentRange) {
-    // The range changed again while this request was in flight. That newer
-    // selection has its own in-flight (or already-rendered) load, so applying
-    // this stale response would show data for the wrong range.
+async function loadSalesOverTimeView(
+  shopDomain: string,
+  apiVersion: string,
+  token: string,
+  range: DateRange,
+  chartType: ChartType,
+  locale: string,
+  timezone: string,
+) {
+  const [shopInfo, table] = await Promise.all([
+    fetchShopInfo(shopDomain, apiVersion, token),
+    fetchSalesOverTime(shopDomain, apiVersion, token, range),
+  ])
+  return {
+    shopInfo,
+    render: () =>
+      renderSalesOverTime(
+        table,
+        chartType,
+        shopInfo.currencyCode,
+        locale,
+        timezone,
+      ),
+  }
+}
+
+async function loadSalesByProductView(
+  shopDomain: string,
+  apiVersion: string,
+  token: string,
+  range: DateRange,
+  chartType: ChartType,
+  locale: string,
+) {
+  const [shopInfo, table] = await Promise.all([
+    fetchShopInfo(shopDomain, apiVersion, token),
+    fetchSalesByProduct(shopDomain, apiVersion, token, range),
+  ])
+  return {
+    shopInfo,
+    render: () =>
+      renderSalesByProduct(table, chartType, shopInfo.currencyCode, locale),
+  }
+}
+
+async function loadSalesBreakdownView(
+  shopDomain: string,
+  apiVersion: string,
+  token: string,
+  range: DateRange,
+  locale: string,
+) {
+  const [shopInfo, table] = await Promise.all([
+    fetchShopInfo(shopDomain, apiVersion, token),
+    fetchSalesBreakdown(shopDomain, apiVersion, token, range),
+  ])
+  return {
+    shopInfo,
+    render: () => renderSalesBreakdown(table, shopInfo.currencyCode, locale),
+  }
+}
+
+async function loadActiveView(
+  credentials: ShopifyCredentials,
+  context: DashboardContext,
+): Promise<void> {
+  const { token, shopDomain } = credentials
+  const { apiVersion, locale, timezone } = context
+  const range = currentRange
+  const view = currentView
+  const chartType = currentChartType
+
+  const { shopInfo, render } =
+    view === 'sales_over_time'
+      ? await loadSalesOverTimeView(
+          shopDomain,
+          apiVersion,
+          token,
+          range,
+          chartType,
+          locale,
+          timezone,
+        )
+      : view === 'sales_by_product'
+        ? await loadSalesByProductView(
+            shopDomain,
+            apiVersion,
+            token,
+            range,
+            chartType,
+            locale,
+          )
+        : view === 'sales_breakdown'
+          ? await loadSalesBreakdownView(
+              shopDomain,
+              apiVersion,
+              token,
+              range,
+              locale,
+            )
+          : await loadSummaryView(
+              shopDomain,
+              apiVersion,
+              token,
+              range,
+              locale,
+              timezone,
+            )
+
+  if (range !== currentRange || view !== currentView) {
+    // A newer selection was made while this request was in flight; its own
+    // load will render the correct view/data, so skip this stale response.
     return
   }
 
@@ -68,12 +203,9 @@ async function loadDashboard(
     shopNameEl.textContent = shopInfo.name
   }
 
-  renderKpiLabels(range)
   renderDateRangeSwitcher(range)
-  renderKpis(
-    extractKpis(salesTable, sessionsTable, shopInfo.currencyCode, locale),
-  )
-  renderOrders(orders, locale, timezone)
+  showView(view)
+  render()
   showScreen('dashboard')
 }
 
@@ -96,22 +228,13 @@ function setupDateRangeSwitcher(onChange: () => void): void {
   })
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  setupErrorHandling()
-  setupTheme()
+interface AppSettings {
+  apiVersion: string
+  refreshInterval: number
+  displayErrors: boolean
+}
 
-  const apiVersion = getSettingWithDefault<string>(
-    'api_version',
-    DEFAULT_API_VERSION,
-  )
-  const refreshInterval = getSettingWithDefault<number>(
-    'refresh_interval',
-    DEFAULT_REFRESH_INTERVAL,
-  )
-  const displayErrors =
-    getSettingWithDefault<string>('display_errors', 'false') === 'true'
-  const reportError = createErrorReporter(displayErrors)
-
+function loadAppSettings(): AppSettings {
   const configuredRange = getSettingWithDefault<string>(
     'default_date_range',
     DEFAULT_DATE_RANGE,
@@ -119,6 +242,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (isDateRange(configuredRange)) {
     currentRange = configuredRange
   }
+
+  const configuredView = getSettingWithDefault<string>('view', DEFAULT_VIEW)
+  if (isView(configuredView)) {
+    currentView = configuredView
+  }
+
+  const configuredChartType = getSettingWithDefault<string>(
+    'chart_type',
+    DEFAULT_CHART_TYPE,
+  )
+  if (isChartType(configuredChartType)) {
+    currentChartType = configuredChartType
+  }
+
+  return {
+    apiVersion: getSettingWithDefault<string>(
+      'api_version',
+      DEFAULT_API_VERSION,
+    ),
+    refreshInterval: getSettingWithDefault<number>(
+      'refresh_interval',
+      DEFAULT_REFRESH_INTERVAL,
+    ),
+    displayErrors:
+      getSettingWithDefault<string>('display_errors', 'false') === 'true',
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  setupErrorHandling()
+  setupTheme()
+
+  const { apiVersion, refreshInterval, displayErrors } = loadAppSettings()
+  const reportError = createErrorReporter(displayErrors)
 
   const locale = await getLocale()
   const timezone = await getTimeZone()
@@ -153,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           reportError('Please set the Shop Domain in settings.')
           return
         }
-        await loadDashboard(creds, context)
+        await loadActiveView(creds, context)
       },
     )
 
