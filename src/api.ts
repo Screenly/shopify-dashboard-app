@@ -1,11 +1,12 @@
 import { getCorsProxyUrl } from '@screenly/edge-apps'
+import type { DateRange } from './constants'
 import {
   RECENT_ORDERS_COUNT,
   RECENT_ORDERS_QUERY,
-  SALES_QUERY,
-  SESSIONS_QUERY,
   SHOP_QUERY,
   SHOPIFYQL_QUERY,
+  salesQuery,
+  sessionsQuery,
 } from './constants'
 
 export class AuthError extends Error {
@@ -153,14 +154,21 @@ export async function fetchSalesSummary(
   shopDomain: string,
   apiVersion: string,
   token: string,
+  range: DateRange,
 ): Promise<ShopifyqlTableData | null> {
-  return fetchShopifyqlTable(shopDomain, apiVersion, token, SALES_QUERY)
+  return fetchShopifyqlTable(shopDomain, apiVersion, token, salesQuery(range))
 }
 
 export async function fetchSessionsSummary(
   shopDomain: string,
   apiVersion: string,
   token: string,
+  range: DateRange,
 ): Promise<ShopifyqlTableData | null> {
-  return fetchShopifyqlTable(shopDomain, apiVersion, token, SESSIONS_QUERY)
+  return fetchShopifyqlTable(
+    shopDomain,
+    apiVersion,
+    token,
+    sessionsQuery(range),
+  )
 }

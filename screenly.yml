@@ -26,6 +26,23 @@ settings:
         advanced: true
         help_text: The Shopify Admin API version used for GraphQL requests.
       schema_version: 1
+  default_date_range:
+    type: string
+    default_value: 30d
+    title: Default Date Range
+    optional: true
+    help_text:
+      properties:
+        help_text: The date range shown on the dashboard when it loads. Can still be changed on-screen using the switcher.
+        options:
+          - label: Today
+            value: today
+          - label: 7 Days
+            value: 7d
+          - label: 30 Days
+            value: 30d
+        type: select
+      schema_version: 1
   display_errors:
     type: string
     default_value: 'false'

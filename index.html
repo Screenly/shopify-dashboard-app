@@ -16,23 +16,64 @@
         <app-header class="header" show-date></app-header>
         <main class="content">
           <div id="dashboard" hidden>
-            <h1 id="shop-name" class="shop-name"></h1>
+            <div class="dashboard-toolbar">
+              <h1 id="shop-name" class="shop-name"></h1>
+              <div
+                id="date-range-switcher"
+                class="date-range-switcher"
+                role="group"
+                aria-label="Date range"
+              >
+                <button
+                  type="button"
+                  class="date-range-option"
+                  data-range="today"
+                  aria-pressed="false"
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  class="date-range-option"
+                  data-range="7d"
+                  aria-pressed="false"
+                >
+                  7D
+                </button>
+                <button
+                  type="button"
+                  class="date-range-option"
+                  data-range="30d"
+                  aria-pressed="false"
+                >
+                  30D
+                </button>
+              </div>
+            </div>
 
             <section class="kpi-grid">
               <article class="kpi-card">
-                <span class="kpi-label">Total Sales (30d)</span>
+                <span id="kpi-label-total-sales" class="kpi-label"
+                  >Total Sales (30D)</span
+                >
                 <span id="kpi-total-sales" class="kpi-value"></span>
               </article>
               <article class="kpi-card">
-                <span class="kpi-label">Orders (30d)</span>
+                <span id="kpi-label-orders" class="kpi-label"
+                  >Orders (30D)</span
+                >
                 <span id="kpi-orders" class="kpi-value"></span>
               </article>
               <article class="kpi-card">
-                <span class="kpi-label">Sessions (30d)</span>
+                <span id="kpi-label-sessions" class="kpi-label"
+                  >Sessions (30D)</span
+                >
                 <span id="kpi-sessions" class="kpi-value"></span>
               </article>
               <article class="kpi-card">
-                <span class="kpi-label">Conversion Rate (30d)</span>
+                <span id="kpi-label-conversion-rate" class="kpi-label"
+                  >Conversion Rate (30D)</span
+                >
                 <span id="kpi-conversion-rate" class="kpi-value"></span>
               </article>
             </section>
