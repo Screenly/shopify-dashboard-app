@@ -48,20 +48,28 @@ async function loadDashboard(
 ): Promise<void> {
   const { token, shopDomain } = credentials
   const { apiVersion, locale, timezone } = context
+  const range = currentRange
   const [shopInfo, salesTable, sessionsTable, orders] = await Promise.all([
     fetchShopInfo(shopDomain, apiVersion, token),
-    fetchSalesSummary(shopDomain, apiVersion, token, currentRange),
-    fetchSessionsSummary(shopDomain, apiVersion, token, currentRange),
+    fetchSalesSummary(shopDomain, apiVersion, token, range),
+    fetchSessionsSummary(shopDomain, apiVersion, token, range),
     fetchRecentOrders(shopDomain, apiVersion, token),
   ])
+
+  if (range !== currentRange) {
+    // The range changed again while this request was in flight. That newer
+    // selection has its own in-flight (or already-rendered) load, so applying
+    // this stale response would show data for the wrong range.
+    return
+  }
 
   const shopNameEl = document.getElementById('shop-name')
   if (shopNameEl) {
     shopNameEl.textContent = shopInfo.name
   }
 
-  renderKpiLabels(currentRange)
-  renderDateRangeSwitcher(currentRange)
+  renderKpiLabels(range)
+  renderDateRangeSwitcher(range)
   renderKpis(
     extractKpis(salesTable, sessionsTable, shopInfo.currencyCode, locale),
   )
@@ -78,8 +86,8 @@ function setupDateRangeSwitcher(onChange: () => void): void {
     const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
       '[data-range]',
     )
-    const range = button?.dataset.range as DateRange | undefined
-    if (!range || range === currentRange) {
+    const range = button?.dataset.range
+    if (!range || !isDateRange(range) || range === currentRange) {
       return
     }
     currentRange = range

@@ -21,7 +21,7 @@ const DATE_RANGE_SHOPIFYQL_SINCE: Record<DateRange, string> = {
 }
 
 export function isDateRange(value: string): value is DateRange {
-  return value in DATE_RANGE_LABELS
+  return Object.prototype.hasOwnProperty.call(DATE_RANGE_LABELS, value)
 }
 
 export function salesQuery(range: DateRange): string {
