@@ -4,10 +4,33 @@ export const DEFAULT_REFRESH_INTERVAL = 300
 
 export const RECENT_ORDERS_COUNT = 8
 
-export const SALES_QUERY = 'FROM sales SHOW total_sales, orders SINCE -30d'
+export type DateRange = 'today' | '7d' | '30d'
 
-export const SESSIONS_QUERY =
-  'FROM sessions SHOW sessions, conversion_rate SINCE -30d'
+export const DEFAULT_DATE_RANGE: DateRange = '30d'
+
+export const DATE_RANGE_LABELS: Record<DateRange, string> = {
+  today: 'Today',
+  '7d': '7D',
+  '30d': '30D',
+}
+
+const DATE_RANGE_SHOPIFYQL_SINCE: Record<DateRange, string> = {
+  today: 'today',
+  '7d': '-7d',
+  '30d': '-30d',
+}
+
+export function isDateRange(value: string): value is DateRange {
+  return value in DATE_RANGE_LABELS
+}
+
+export function salesQuery(range: DateRange): string {
+  return `FROM sales SHOW total_sales, orders SINCE ${DATE_RANGE_SHOPIFYQL_SINCE[range]}`
+}
+
+export function sessionsQuery(range: DateRange): string {
+  return `FROM sessions SHOW sessions, conversion_rate SINCE ${DATE_RANGE_SHOPIFYQL_SINCE[range]}`
+}
 
 export const SHOP_QUERY = `
   query ShopInfo {

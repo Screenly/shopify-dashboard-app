@@ -1,5 +1,7 @@
 import { formatLocalizedDate } from '@screenly/edge-apps'
 import type { ShopifyOrder, ShopifyqlTableData } from './api'
+import type { DateRange } from './constants'
+import { DATE_RANGE_LABELS } from './constants'
 
 export interface KpiValues {
   totalSales: string
@@ -95,6 +97,39 @@ export function renderKpis(kpis: KpiValues): void {
     if (el) {
       el.textContent = kpis[key]
     }
+  }
+}
+
+const KPI_LABEL_BASE: Record<keyof KpiValues, string> = {
+  totalSales: 'Total Sales',
+  orders: 'Orders',
+  sessions: 'Sessions',
+  conversionRate: 'Conversion Rate',
+}
+
+export function renderKpiLabels(range: DateRange): void {
+  const fields: [keyof KpiValues, string][] = [
+    ['totalSales', 'kpi-label-total-sales'],
+    ['orders', 'kpi-label-orders'],
+    ['sessions', 'kpi-label-sessions'],
+    ['conversionRate', 'kpi-label-conversion-rate'],
+  ]
+  for (const [key, id] of fields) {
+    const el = document.getElementById(id)
+    if (el) {
+      el.textContent = `${KPI_LABEL_BASE[key]} (${DATE_RANGE_LABELS[range]})`
+    }
+  }
+}
+
+export function renderDateRangeSwitcher(range: DateRange): void {
+  const buttons = document.querySelectorAll<HTMLButtonElement>(
+    '#date-range-switcher [data-range]',
+  )
+  for (const button of buttons) {
+    const isActive = button.dataset.range === range
+    button.classList.toggle('active', isActive)
+    button.setAttribute('aria-pressed', String(isActive))
   }
 }
 
