@@ -63,6 +63,7 @@ for (const { width, height } of RESOLUTIONS) {
       viewDir,
       settings: SALES_BREAKDOWN_SETTINGS,
       resolvePayload: makeResolvePayload(MOCK_SALES_BREAKDOWN),
+      filenameSuffix: '-auto',
     })
   })
 }

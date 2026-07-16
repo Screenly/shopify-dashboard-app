@@ -65,6 +65,7 @@ for (const { width, height } of RESOLUTIONS) {
       viewDir,
       settings: SALES_OVER_TIME_SETTINGS,
       resolvePayload: makeResolvePayload(MOCK_SALES_OVER_TIME),
+      filenameSuffix: '-auto',
     })
   })
 }

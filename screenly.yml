@@ -73,6 +73,25 @@ settings:
         help_text: For debugging purposes to display errors on the screen.
         type: boolean
       schema_version: 1
+  kpi_metric:
+    type: string
+    default_value: total_sales
+    title: Key Metric
+    optional: true
+    help_text:
+      properties:
+        help_text: Which metric to show full-screen in the Key Metric view. Ignored by other views.
+        options:
+          - label: Total Sales
+            value: total_sales
+          - label: Orders
+            value: orders
+          - label: Sessions
+            value: sessions
+          - label: Conversion Rate
+            value: conversion_rate
+        type: select
+      schema_version: 1
   override_locale:
     type: string
     default_value: ''
@@ -121,5 +140,7 @@ settings:
             value: sales_by_product
           - label: Total Sales Breakdown
             value: sales_breakdown
+          - label: Key Metric
+            value: kpi
         type: select
       schema_version: 1

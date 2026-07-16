@@ -1,31 +1,5 @@
-import {
-  BarController,
-  BarElement,
-  CategoryScale,
-  Chart,
-  LinearScale,
-  LineController,
-  LineElement,
-  PointElement,
-} from 'chart.js'
-import type {
-  ChartConfiguration,
-  ChartTypeRegistry,
-  Plugin,
-  ScriptableContext,
-} from 'chart.js'
-
-// No Tooltip/Legend plugin: single-series charts don't need a legend box,
-// and this is digital signage with no pointer/hover input.
-Chart.register(
-  BarController,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  LineController,
-  LineElement,
-  PointElement,
-)
+import { Chart } from 'chart.js'
+import type { ChartConfiguration, ChartTypeRegistry } from 'chart.js'
 
 export interface ChartDatum {
   label: string
@@ -52,8 +26,6 @@ export const CATEGORICAL_COLORS = [
 ]
 export const SINGLE_SERIES_COLOR = CATEGORICAL_COLORS[0]
 export const SURFACE_COLOR = '#1a1a19'
-const GRIDLINE_COLOR = '#2c2c2a'
-const AXIS_COLOR = '#383835'
 export const MUTED_TEXT = '#898781'
 export const PRIMARY_TEXT = '#ffffff'
 
@@ -127,25 +99,59 @@ export function setContainerFixedHeight(
   container.style.flex = heightPx === null ? '' : 'none'
 }
 
-function getCanvas(containerId: string): HTMLCanvasElement | null {
+export interface CenteredSize {
+  widthPx: number
+  heightPx: number
+}
+
+const CENTERED_WRAP_CLASS = 'centered-canvas-wrap'
+
+// Chart.js sizes the canvas off its direct parent's box, so a fixed-size
+// wrapper is what centers it — capping the container itself collapses it.
+function getCanvas(
+  containerId: string,
+  centeredSize?: CenteredSize,
+): HTMLCanvasElement | null {
   const container = document.getElementById(containerId)
   if (!container) {
     return null
   }
-  let canvas = container.querySelector('canvas')
-  if (!canvas) {
-    container.innerHTML = ''
-    canvas = document.createElement('canvas')
-    container.appendChild(canvas)
+
+  if (!centeredSize) {
+    let canvas = container.querySelector('canvas')
+    if (!canvas || canvas.parentElement !== container) {
+      container.innerHTML = ''
+      canvas = document.createElement('canvas')
+      container.appendChild(canvas)
+    }
+    return canvas
   }
-  return canvas
+
+  let wrap = container.querySelector<HTMLDivElement>(`.${CENTERED_WRAP_CLASS}`)
+  if (!wrap) {
+    container.innerHTML = ''
+    wrap = document.createElement('div')
+    wrap.className = CENTERED_WRAP_CLASS
+    wrap.style.position = 'absolute'
+    wrap.style.top = '50%'
+    wrap.style.left = '50%'
+    wrap.style.transform = 'translate(-50%, -50%)'
+    wrap.appendChild(document.createElement('canvas'))
+    container.appendChild(wrap)
+  }
+  wrap.style.width = `${centeredSize.widthPx}px`
+  wrap.style.height = `${centeredSize.heightPx}px`
+  wrap.style.maxWidth = '100%'
+  wrap.style.maxHeight = '100%'
+  return wrap.querySelector('canvas')
 }
 
 export function renderChart<TType extends keyof ChartTypeRegistry>(
   containerId: string,
   config: ChartConfiguration<TType>,
+  centeredSize?: CenteredSize,
 ): void {
-  const canvas = getCanvas(containerId)
+  const canvas = getCanvas(containerId, centeredSize)
   if (!canvas) {
     return
   }
@@ -157,159 +163,4 @@ export function renderChart<TType extends keyof ChartTypeRegistry>(
     containerId,
     new Chart(canvas, config as ChartConfiguration),
   )
-}
-
-// Chart.js has no built-in "label the endpoint" behavior; a datalabels
-// plugin package would add one, but the dataviz skill's guidance (label
-// selectively, e.g. the endpoint) is cheap enough to draw ourselves.
-function endLabelPlugin(options: ChartOptions): Plugin<'line'> {
-  return {
-    id: 'endLabel',
-    afterDatasetsDraw(chart) {
-      const meta = chart.getDatasetMeta(0)
-      const point = meta.data[meta.data.length - 1]
-      const value = chart.data.datasets[0].data.at(-1) as number | undefined
-      if (!point || value === undefined) {
-        return
-      }
-      const ctx = chart.ctx
-      ctx.save()
-      ctx.fillStyle = PRIMARY_TEXT
-      ctx.font = '600 14px system-ui, sans-serif'
-      ctx.textAlign = 'right'
-      ctx.fillText(formatCurrency(value, options), point.x, point.y - 14)
-      ctx.restore()
-    },
-  }
-}
-
-function firstLastTickCallback(labels: string[]) {
-  return (_value: string | number, index: number): string =>
-    index === 0 || index === labels.length - 1
-      ? truncateLabel(labels[index], 16)
-      : ''
-}
-
-export function renderLineChart(
-  containerId: string,
-  points: ChartDatum[],
-  options: ChartOptions,
-): void {
-  if (points.length === 0) {
-    showEmptyState(containerId)
-    return
-  }
-
-  const labels = points.map((p) => p.label)
-  renderChart(containerId, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          data: points.map((p) => p.value),
-          borderColor: SINGLE_SERIES_COLOR,
-          backgroundColor: SINGLE_SERIES_COLOR,
-          borderWidth: 2,
-          pointRadius: (ctx: ScriptableContext<'line'>) =>
-            ctx.dataIndex === points.length - 1 ? 5 : 0,
-          pointBackgroundColor: SINGLE_SERIES_COLOR,
-          pointBorderColor: SURFACE_COLOR,
-          pointBorderWidth: 2,
-          tension: 0,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: {
-          grid: { display: false },
-          border: { color: AXIS_COLOR },
-          ticks: {
-            color: MUTED_TEXT,
-            autoSkip: false,
-            maxRotation: 0,
-            minRotation: 0,
-            callback: firstLastTickCallback(labels),
-          },
-        },
-        y: {
-          beginAtZero: true,
-          grid: { color: GRIDLINE_COLOR },
-          border: { display: false },
-          ticks: {
-            color: MUTED_TEXT,
-            callback: (value) => formatCurrency(Number(value), options, true),
-          },
-        },
-      },
-    },
-    plugins: [endLabelPlugin(options)],
-  })
-}
-
-export function renderColumnChart(
-  containerId: string,
-  points: ChartDatum[],
-  options: ChartOptions,
-): void {
-  if (points.length === 0) {
-    showEmptyState(containerId)
-    return
-  }
-
-  const labels = points.map((p) => p.label)
-  renderChart(containerId, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          data: points.map((p) => p.value),
-          backgroundColor: SINGLE_SERIES_COLOR,
-          borderRadius: {
-            topLeft: 4,
-            topRight: 4,
-            bottomLeft: 0,
-            bottomRight: 0,
-          },
-          maxBarThickness: 24,
-          categoryPercentage: 0.8,
-          barPercentage: 0.9,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: {
-          grid: { display: false },
-          border: { color: AXIS_COLOR },
-          ticks: {
-            color: MUTED_TEXT,
-            autoSkip: false,
-            maxRotation: 0,
-            minRotation: 0,
-            callback: firstLastTickCallback(labels),
-          },
-        },
-        y: {
-          beginAtZero: true,
-          grid: { color: GRIDLINE_COLOR },
-          border: { display: false },
-          ticks: {
-            color: MUTED_TEXT,
-            callback: (value) => formatCurrency(Number(value), options, true),
-          },
-        },
-      },
-    },
-  })
 }

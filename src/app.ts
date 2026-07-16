@@ -1,6 +1,6 @@
 import { formatLocalizedDate } from '@screenly/edge-apps'
 import type { ShopifyOrder, ShopifyqlTableData } from './api'
-import type { DateRange } from './constants'
+import type { DateRange, KpiMetric } from './constants'
 import { DATE_RANGE_LABELS } from './constants'
 
 export interface KpiValues {
@@ -119,6 +119,29 @@ export function renderKpiLabels(range: DateRange): void {
     if (el) {
       el.textContent = `${KPI_LABEL_BASE[key]} (${DATE_RANGE_LABELS[range]})`
     }
+  }
+}
+
+const KPI_METRIC_TO_FIELD: Record<KpiMetric, keyof KpiValues> = {
+  total_sales: 'totalSales',
+  orders: 'orders',
+  sessions: 'sessions',
+  conversion_rate: 'conversionRate',
+}
+
+export function renderKpiSpotlight(
+  kpis: KpiValues,
+  metric: KpiMetric,
+  range: DateRange,
+): void {
+  const field = KPI_METRIC_TO_FIELD[metric]
+  const valueEl = document.getElementById('kpi-spotlight-value')
+  const labelEl = document.getElementById('kpi-spotlight-label')
+  if (valueEl) {
+    valueEl.textContent = kpis[field]
+  }
+  if (labelEl) {
+    labelEl.textContent = `${KPI_LABEL_BASE[field]} (${DATE_RANGE_LABELS[range]})`
   }
 }
 

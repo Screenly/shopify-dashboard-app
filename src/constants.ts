@@ -37,7 +37,7 @@ export function sessionsQuery(range: DateRange): string {
 }
 
 export type ViewName =
-  'summary' | 'sales_over_time' | 'sales_by_product' | 'sales_breakdown'
+  'summary' | 'sales_over_time' | 'sales_by_product' | 'sales_breakdown' | 'kpi'
 
 export const DEFAULT_VIEW: ViewName = 'summary'
 
@@ -46,10 +46,27 @@ export const VIEW_LABELS: Record<ViewName, string> = {
   sales_over_time: 'Total Sales Over Time',
   sales_by_product: 'Total Sales By Product',
   sales_breakdown: 'Total Sales Breakdown',
+  kpi: 'Key Metric',
 }
 
 export function isView(value: string): value is ViewName {
   return Object.prototype.hasOwnProperty.call(VIEW_LABELS, value)
+}
+
+export type KpiMetric =
+  'total_sales' | 'orders' | 'sessions' | 'conversion_rate'
+
+export const DEFAULT_KPI_METRIC: KpiMetric = 'total_sales'
+
+export const KPI_METRIC_LABELS: Record<KpiMetric, string> = {
+  total_sales: 'Total Sales',
+  orders: 'Orders',
+  sessions: 'Sessions',
+  conversion_rate: 'Conversion Rate',
+}
+
+export function isKpiMetric(value: string): value is KpiMetric {
+  return Object.prototype.hasOwnProperty.call(KPI_METRIC_LABELS, value)
 }
 
 export type ChartType = 'auto' | 'line' | 'bar' | 'donut'

@@ -2,8 +2,8 @@ import { formatLocalizedDate } from '@screenly/edge-apps'
 import { formatMoney, KPI_PLACEHOLDER } from './app'
 import type { ShopifyqlTableData } from './api'
 import type { ChartDatum } from './charts'
-import { renderColumnChart, renderLineChart } from './charts'
 import { renderDonutChart, renderRankedBarChart } from './product-charts'
+import { renderColumnChart, renderLineChart } from './time-series-charts'
 import type { ChartType, ViewName } from './constants'
 
 export function renderSalesOverTime(
@@ -119,6 +119,7 @@ export function showView(view: ViewName): void {
     sales_over_time: 'view-sales-over-time',
     sales_by_product: 'view-sales-by-product',
     sales_breakdown: 'view-sales-breakdown',
+    kpi: 'view-kpi',
   }
   for (const [viewName, id] of Object.entries(views)) {
     const el = document.getElementById(id)

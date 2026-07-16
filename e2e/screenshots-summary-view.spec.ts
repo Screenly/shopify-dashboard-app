@@ -4,45 +4,8 @@ import {
   captureScreenshot,
   getViewScreenshotsDir,
   MOCK_SHOP,
+  resolveSalesOrSessions,
 } from './screenshot-helpers'
-
-const MOCK_SALES = {
-  data: {
-    shopifyqlQuery: {
-      tableData: {
-        columns: [
-          {
-            name: 'total_sales',
-            dataType: 'MONEY',
-            displayName: 'Total sales',
-          },
-          { name: 'orders', dataType: 'INTEGER', displayName: 'Orders' },
-        ],
-        rows: [{ total_sales: '48210.25', orders: '312' }],
-      },
-      parseErrors: [],
-    },
-  },
-}
-
-const MOCK_SESSIONS = {
-  data: {
-    shopifyqlQuery: {
-      tableData: {
-        columns: [
-          { name: 'sessions', dataType: 'INTEGER', displayName: 'Sessions' },
-          {
-            name: 'conversion_rate',
-            dataType: 'PERCENT',
-            displayName: 'Conversion rate',
-          },
-        ],
-        rows: [{ sessions: '10482', conversion_rate: '3.1' }],
-      },
-      parseErrors: [],
-    },
-  },
-}
 
 const MOCK_ORDER_ITEMS = [
   ['#1042', '2025-12-08T09:45:00Z', '512.40', 'PAID', 'FULFILLED'],
@@ -78,7 +41,7 @@ const MOCK_ORDERS = {
 
 function resolvePayload(body: string): unknown {
   if (body.includes('shopifyqlQuery')) {
-    return body.includes('FROM sales') ? MOCK_SALES : MOCK_SESSIONS
+    return resolveSalesOrSessions(body)
   }
   if (body.includes('RecentOrders')) {
     return MOCK_ORDERS
@@ -97,6 +60,7 @@ for (const { width, height } of RESOLUTIONS) {
       viewDir,
       settings: { access_token: 'mock-access-token' },
       resolvePayload,
+      filenameSuffix: '-auto',
     })
   })
 }

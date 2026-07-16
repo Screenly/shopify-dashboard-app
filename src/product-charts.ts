@@ -15,7 +15,6 @@ import {
   MUTED_TEXT,
   PRIMARY_TEXT,
   SINGLE_SERIES_COLOR,
-  SURFACE_COLOR,
   formatCurrency,
   foldIntoOther,
   renderChart,
@@ -29,6 +28,12 @@ const MAX_RANKED_BAR_ROW_HEIGHT = 120
 const TARGET_RANKED_BAR_LIST_HEIGHT = 480
 const MAX_RANKED_BAR_ITEMS_LANDSCAPE = 15
 const MAX_RANKED_BAR_ITEMS_PORTRAIT = 30
+const DONUT_SIZE_LANDSCAPE = { widthPx: 1200, heightPx: 520 }
+const DONUT_SIZE_PORTRAIT = { widthPx: 800, heightPx: 900 }
+const DONUT_RADIUS_LANDSCAPE = '100%'
+const DONUT_RADIUS_PORTRAIT = '80%'
+const DONUT_LEGEND_FONT_SIZE_LANDSCAPE = 22
+const DONUT_LEGEND_FONT_SIZE_PORTRAIT = 26
 
 function rankedBarRowHeight(itemCount: number): number {
   return Math.min(
@@ -154,47 +159,58 @@ export function renderDonutChart(
   const isPortrait = window.matchMedia('(orientation: portrait)').matches
 
   setContainerFixedHeight(containerId, null)
-  renderChart(containerId, {
-    type: 'doughnut',
-    data: {
-      labels: data.map((d) => d.label),
-      datasets: [
-        {
-          data: data.map((d) => d.value),
-          backgroundColor: CATEGORICAL_COLORS.slice(0, data.length),
-          borderColor: SURFACE_COLOR,
-          borderWidth: 2,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      cutout: '60%',
-      plugins: {
-        legend: {
-          display: true,
-          position: isPortrait ? 'bottom' : 'right',
-          labels: {
-            color: PRIMARY_TEXT,
-            boxWidth: 12,
-            boxHeight: 12,
-            font: { size: 14 },
-            generateLabels: () =>
-              data.map((d, i) => {
-                const pct = Math.round((d.value / total) * 100)
-                const amount = formatCurrency(d.value, options, true)
-                return {
-                  text: `${truncateLabel(d.label)}  ${amount} · ${pct}%`,
-                  fillStyle: CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length],
-                  strokeStyle: 'transparent',
-                  index: i,
-                }
-              }),
+  renderChart(
+    containerId,
+    {
+      type: 'doughnut',
+      data: {
+        labels: data.map((d) => d.label),
+        datasets: [
+          {
+            data: data.map((d) => d.value),
+            backgroundColor: CATEGORICAL_COLORS.slice(0, data.length),
+            borderWidth: 0,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        cutout: '60%',
+        radius: isPortrait ? DONUT_RADIUS_PORTRAIT : DONUT_RADIUS_LANDSCAPE,
+        plugins: {
+          legend: {
+            display: true,
+            position: isPortrait ? 'bottom' : 'right',
+            labels: {
+              color: PRIMARY_TEXT,
+              boxWidth: 20,
+              boxHeight: 20,
+              padding: 28,
+              font: {
+                size: isPortrait
+                  ? DONUT_LEGEND_FONT_SIZE_PORTRAIT
+                  : DONUT_LEGEND_FONT_SIZE_LANDSCAPE,
+              },
+              generateLabels: () =>
+                data.map((d, i) => {
+                  const pct = Math.round((d.value / total) * 100)
+                  const amount = formatCurrency(d.value, options, true)
+                  return {
+                    text: `${truncateLabel(d.label, 40)}  ${amount} · ${pct}%`,
+                    fillStyle:
+                      CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length],
+                    strokeStyle: 'transparent',
+                    fontColor: PRIMARY_TEXT,
+                    index: i,
+                  }
+                }),
+            },
           },
         },
       },
     },
-  })
+    isPortrait ? DONUT_SIZE_PORTRAIT : DONUT_SIZE_LANDSCAPE,
+  )
 }

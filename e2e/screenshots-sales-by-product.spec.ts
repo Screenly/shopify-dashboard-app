@@ -79,10 +79,16 @@ const SALES_BY_PRODUCT_SETTINGS = {
   chart_type: 'auto',
 }
 
+const DONUT_SETTINGS = {
+  access_token: 'mock-access-token',
+  view: 'sales_by_product',
+  chart_type: 'donut',
+}
+
 const viewDir = getViewScreenshotsDir('sales-by-product')
 
 for (const { width, height } of RESOLUTIONS) {
-  test(`screenshot ${width}x${height}`, async ({ browser }) => {
+  test(`screenshot ${width}x${height} auto`, async ({ browser }) => {
     await captureScreenshot({
       browser,
       width,
@@ -90,6 +96,21 @@ for (const { width, height } of RESOLUTIONS) {
       viewDir,
       settings: SALES_BY_PRODUCT_SETTINGS,
       resolvePayload: makeResolvePayload(MOCK_SALES_BY_PRODUCT),
+      filenameSuffix: '-auto',
+    })
+  })
+}
+
+for (const { width, height } of RESOLUTIONS) {
+  test(`screenshot ${width}x${height} donut`, async ({ browser }) => {
+    await captureScreenshot({
+      browser,
+      width,
+      height,
+      viewDir,
+      settings: DONUT_SETTINGS,
+      resolvePayload: makeResolvePayload(MOCK_SALES_BY_PRODUCT),
+      filenameSuffix: '-donut',
     })
   })
 }

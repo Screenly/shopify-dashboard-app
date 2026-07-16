@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   isChartType,
   isDateRange,
+  isKpiMetric,
   isView,
   salesBreakdownQuery,
   salesByProductQuery,
@@ -29,11 +30,26 @@ describe('isView', () => {
     expect(isView('sales_over_time')).toBe(true)
     expect(isView('sales_by_product')).toBe(true)
     expect(isView('sales_breakdown')).toBe(true)
+    expect(isView('kpi')).toBe(true)
   })
 
   test('rejects invalid values, including inherited Object.prototype names', () => {
     expect(isView('unknown')).toBe(false)
     expect(isView('toString')).toBe(false)
+  })
+})
+
+describe('isKpiMetric', () => {
+  test('accepts valid metrics', () => {
+    expect(isKpiMetric('total_sales')).toBe(true)
+    expect(isKpiMetric('orders')).toBe(true)
+    expect(isKpiMetric('sessions')).toBe(true)
+    expect(isKpiMetric('conversion_rate')).toBe(true)
+  })
+
+  test('rejects invalid values, including inherited Object.prototype names', () => {
+    expect(isKpiMetric('unknown')).toBe(false)
+    expect(isKpiMetric('toString')).toBe(false)
   })
 })
 
