@@ -6,7 +6,18 @@ import {
   setupClockMock,
   setupScreenlyJsMock,
 } from '@screenly/edge-apps/test/screenshots'
+import fs from 'fs'
 import path from 'path'
+import sharp from 'sharp'
+
+// edge-apps-scripts' own PNG->WebP conversion only scans the top level of
+// screenshots/, so screenshots living in per-view subdirectories are
+// converted here directly instead of relying on that flat pass.
+function getViewScreenshotsDir(view: string): string {
+  const dir = path.join(getScreenshotsDir(), view)
+  fs.mkdirSync(dir, { recursive: true })
+  return dir
+}
 
 const SHOP_DOMAIN = 'demo-store.myshopify.com'
 
@@ -101,7 +112,7 @@ const { screenlyJsContent } = createMockScreenlyForScreenshots(
 
 for (const { width, height } of RESOLUTIONS) {
   test(`screenshot ${width}x${height}`, async ({ browser }) => {
-    const screenshotsDir = getScreenshotsDir()
+    const screenshotsDir = getViewScreenshotsDir('summary-view')
 
     const context = await browser.newContext({ viewport: { width, height } })
     const page = await context.newPage()
@@ -127,10 +138,10 @@ for (const { width, height } of RESOLUTIONS) {
     await page.goto('/')
     await page.waitForLoadState('networkidle')
 
-    await page.screenshot({
-      path: path.join(screenshotsDir, `${width}x${height}.png`),
-      fullPage: false,
-    })
+    const png = await page.screenshot({ fullPage: false })
+    await sharp(png)
+      .webp()
+      .toFile(path.join(screenshotsDir, `${width}x${height}.webp`))
 
     await context.close()
   })
