@@ -109,7 +109,6 @@ export async function captureScreenshot({
   const { screenlyJsContent } = createMockScreenlyForScreenshots(
     {},
     {
-      api_version: '2026-07',
       display_errors: 'false',
       override_locale: 'en',
       override_timezone: 'Europe/London',

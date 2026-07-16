@@ -16,16 +16,6 @@ settings:
         help_text: For testing only. In production, the access token is fetched dynamically via the Screenly OAuth service.
         type: oauth:shopify:access_token
       schema_version: 1
-  api_version:
-    type: string
-    default_value: '2026-07'
-    title: API Version
-    optional: true
-    help_text:
-      properties:
-        advanced: true
-        help_text: The Shopify Admin API version used for GraphQL requests.
-      schema_version: 1
   chart_type:
     type: string
     default_value: auto

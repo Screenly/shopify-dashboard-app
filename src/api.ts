@@ -1,6 +1,7 @@
 import { getCorsProxyUrl } from '@screenly/edge-apps'
 import type { DateRange } from './constants'
 import {
+  DEFAULT_API_VERSION,
   RECENT_ORDERS_COUNT,
   RECENT_ORDERS_QUERY,
   SHOP_QUERY,
@@ -71,12 +72,11 @@ function throwIfGraphqlErrors(errors: GraphqlError[] | undefined): void {
 
 async function graphqlRequest<T>(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const endpoint = `https://${shopDomain}/admin/api/${apiVersion}/graphql.json`
+  const endpoint = `https://${shopDomain}/admin/api/${DEFAULT_API_VERSION}/graphql.json`
   const res = await fetch(`${getCorsProxyUrl()}/${endpoint}`, {
     method: 'POST',
     headers: {
@@ -108,12 +108,10 @@ export interface ShopInfo {
 
 export async function fetchShopInfo(
   shopDomain: string,
-  apiVersion: string,
   token: string,
 ): Promise<ShopInfo> {
   const data = await graphqlRequest<{ shop: ShopInfo }>(
     shopDomain,
-    apiVersion,
     token,
     SHOP_QUERY,
   )
@@ -122,12 +120,11 @@ export async function fetchShopInfo(
 
 export async function fetchRecentOrders(
   shopDomain: string,
-  apiVersion: string,
   token: string,
 ): Promise<ShopifyOrder[]> {
   const data = await graphqlRequest<{
     orders: { edges: { node: ShopifyOrder }[] }
-  }>(shopDomain, apiVersion, token, RECENT_ORDERS_QUERY, {
+  }>(shopDomain, token, RECENT_ORDERS_QUERY, {
     first: RECENT_ORDERS_COUNT,
   })
   return data.orders.edges.map((edge) => edge.node)
@@ -135,7 +132,6 @@ export async function fetchRecentOrders(
 
 async function fetchShopifyqlTable(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   shopifyql: string,
 ): Promise<ShopifyqlTableData | null> {
@@ -144,7 +140,7 @@ async function fetchShopifyqlTable(
       tableData: ShopifyqlTableData | null
       parseErrors: string[]
     }
-  }>(shopDomain, apiVersion, token, SHOPIFYQL_QUERY, { query: shopifyql })
+  }>(shopDomain, token, SHOPIFYQL_QUERY, { query: shopifyql })
 
   const { tableData, parseErrors } = data.shopifyqlQuery
   if (parseErrors.length > 0) {
@@ -155,65 +151,40 @@ async function fetchShopifyqlTable(
 
 export async function fetchSalesSummary(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
 ): Promise<ShopifyqlTableData | null> {
-  return fetchShopifyqlTable(shopDomain, apiVersion, token, salesQuery(range))
+  return fetchShopifyqlTable(shopDomain, token, salesQuery(range))
 }
 
 export async function fetchSessionsSummary(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
 ): Promise<ShopifyqlTableData | null> {
-  return fetchShopifyqlTable(
-    shopDomain,
-    apiVersion,
-    token,
-    sessionsQuery(range),
-  )
+  return fetchShopifyqlTable(shopDomain, token, sessionsQuery(range))
 }
 
 export async function fetchSalesOverTime(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
 ): Promise<ShopifyqlTableData | null> {
-  return fetchShopifyqlTable(
-    shopDomain,
-    apiVersion,
-    token,
-    salesOverTimeQuery(range),
-  )
+  return fetchShopifyqlTable(shopDomain, token, salesOverTimeQuery(range))
 }
 
 export async function fetchSalesByProduct(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
 ): Promise<ShopifyqlTableData | null> {
-  return fetchShopifyqlTable(
-    shopDomain,
-    apiVersion,
-    token,
-    salesByProductQuery(range),
-  )
+  return fetchShopifyqlTable(shopDomain, token, salesByProductQuery(range))
 }
 
 export async function fetchSalesBreakdown(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
 ): Promise<ShopifyqlTableData | null> {
-  return fetchShopifyqlTable(
-    shopDomain,
-    apiVersion,
-    token,
-    salesBreakdownQuery(range),
-  )
+  return fetchShopifyqlTable(shopDomain, token, salesBreakdownQuery(range))
 }

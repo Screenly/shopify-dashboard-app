@@ -23,17 +23,16 @@ import {
 
 async function loadSummaryView(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
   locale: string,
   timezone: string,
 ) {
   const [shopInfo, salesTable, sessionsTable, orders] = await Promise.all([
-    fetchShopInfo(shopDomain, apiVersion, token),
-    fetchSalesSummary(shopDomain, apiVersion, token, range),
-    fetchSessionsSummary(shopDomain, apiVersion, token, range),
-    fetchRecentOrders(shopDomain, apiVersion, token),
+    fetchShopInfo(shopDomain, token),
+    fetchSalesSummary(shopDomain, token, range),
+    fetchSessionsSummary(shopDomain, token, range),
+    fetchRecentOrders(shopDomain, token),
   ])
   return {
     shopInfo,
@@ -49,16 +48,15 @@ async function loadSummaryView(
 
 async function loadKpiView(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
   metric: KpiMetric,
   locale: string,
 ) {
   const [shopInfo, salesTable, sessionsTable] = await Promise.all([
-    fetchShopInfo(shopDomain, apiVersion, token),
-    fetchSalesSummary(shopDomain, apiVersion, token, range),
-    fetchSessionsSummary(shopDomain, apiVersion, token, range),
+    fetchShopInfo(shopDomain, token),
+    fetchSalesSummary(shopDomain, token, range),
+    fetchSessionsSummary(shopDomain, token, range),
   ])
   return {
     shopInfo,
@@ -73,7 +71,6 @@ async function loadKpiView(
 
 async function loadSalesOverTimeView(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
   chartType: ChartType,
@@ -81,8 +78,8 @@ async function loadSalesOverTimeView(
   timezone: string,
 ) {
   const [shopInfo, table] = await Promise.all([
-    fetchShopInfo(shopDomain, apiVersion, token),
-    fetchSalesOverTime(shopDomain, apiVersion, token, range),
+    fetchShopInfo(shopDomain, token),
+    fetchSalesOverTime(shopDomain, token, range),
   ])
   return {
     shopInfo,
@@ -99,15 +96,14 @@ async function loadSalesOverTimeView(
 
 async function loadSalesByProductView(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
   chartType: ChartType,
   locale: string,
 ) {
   const [shopInfo, table] = await Promise.all([
-    fetchShopInfo(shopDomain, apiVersion, token),
-    fetchSalesByProduct(shopDomain, apiVersion, token, range),
+    fetchShopInfo(shopDomain, token),
+    fetchSalesByProduct(shopDomain, token, range),
   ])
   return {
     shopInfo,
@@ -118,14 +114,13 @@ async function loadSalesByProductView(
 
 async function loadSalesBreakdownView(
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
   locale: string,
 ) {
   const [shopInfo, table] = await Promise.all([
-    fetchShopInfo(shopDomain, apiVersion, token),
-    fetchSalesBreakdown(shopDomain, apiVersion, token, range),
+    fetchShopInfo(shopDomain, token),
+    fetchSalesBreakdown(shopDomain, token, range),
   ])
   return {
     shopInfo,
@@ -136,7 +131,6 @@ async function loadSalesBreakdownView(
 export function loadViewData(
   view: ViewName,
   shopDomain: string,
-  apiVersion: string,
   token: string,
   range: DateRange,
   chartType: ChartType,
@@ -147,7 +141,6 @@ export function loadViewData(
   if (view === 'sales_over_time') {
     return loadSalesOverTimeView(
       shopDomain,
-      apiVersion,
       token,
       range,
       chartType,
@@ -156,20 +149,13 @@ export function loadViewData(
     )
   }
   if (view === 'sales_by_product') {
-    return loadSalesByProductView(
-      shopDomain,
-      apiVersion,
-      token,
-      range,
-      chartType,
-      locale,
-    )
+    return loadSalesByProductView(shopDomain, token, range, chartType, locale)
   }
   if (view === 'sales_breakdown') {
-    return loadSalesBreakdownView(shopDomain, apiVersion, token, range, locale)
+    return loadSalesBreakdownView(shopDomain, token, range, locale)
   }
   if (view === 'kpi') {
-    return loadKpiView(shopDomain, apiVersion, token, range, kpiMetric, locale)
+    return loadKpiView(shopDomain, token, range, kpiMetric, locale)
   }
-  return loadSummaryView(shopDomain, apiVersion, token, range, locale, timezone)
+  return loadSummaryView(shopDomain, token, range, locale, timezone)
 }

@@ -43,7 +43,6 @@ After `mock-data.yml` is generated, fill in your values under `settings`:
 ```yaml
 settings:
   access_token: '<your Admin API access token>'
-  api_version: '2026-07'
   display_errors: 'false'
   override_locale: ''
   override_timezone: ''
@@ -110,7 +109,6 @@ The `view` setting selects a single view to show on screen. Digital signage is p
 | Setting              | Description                                                                                                      | Type     | Default         |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------- | -------- | --------------- |
 | `access_token`       | Admin API access token (testing/development only)                                                                | optional | —               |
-| `api_version`        | Shopify Admin API version used for GraphQL requests                                                              | optional | `2026-07`       |
 | `chart_type`         | Preferred chart style for Total Sales Over Time / Total Sales By Product (`auto`, `line`, `bar`, `donut`)        | optional | `auto`          |
 | `default_date_range` | Date range shown when the dashboard loads (`today`, `7d`, `30d`); still changeable on-screen                     | optional | `30d`           |
 | `display_errors`     | Show errors on screen for debugging purposes                                                                     | optional | `false`         |

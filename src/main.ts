@@ -16,7 +16,6 @@ import type { ChartType, DateRange, KpiMetric, ViewName } from './constants'
 import { showView } from './views'
 import { loadViewData } from './view-loaders'
 import {
-  DEFAULT_API_VERSION,
   DEFAULT_CHART_TYPE,
   DEFAULT_DATE_RANGE,
   DEFAULT_KPI_METRIC,
@@ -29,7 +28,6 @@ import {
 } from './constants'
 
 interface DashboardContext {
-  apiVersion: string
   locale: string
   timezone: string
 }
@@ -44,7 +42,7 @@ async function loadActiveView(
   context: DashboardContext,
 ): Promise<void> {
   const { token, shopDomain } = credentials
-  const { apiVersion, locale, timezone } = context
+  const { locale, timezone } = context
   const range = currentRange
   const view = currentView
   const chartType = currentChartType
@@ -53,7 +51,6 @@ async function loadActiveView(
   const { shopInfo, render } = await loadViewData(
     view,
     shopDomain,
-    apiVersion,
     token,
     range,
     chartType,
@@ -99,7 +96,6 @@ function setupDateRangeSwitcher(onChange: () => void): void {
 }
 
 interface AppSettings {
-  apiVersion: string
   refreshInterval: number
   displayErrors: boolean
 }
@@ -135,10 +131,6 @@ function loadAppSettings(): AppSettings {
   }
 
   return {
-    apiVersion: getSettingWithDefault<string>(
-      'api_version',
-      DEFAULT_API_VERSION,
-    ),
     refreshInterval: getSettingWithDefault<number>(
       'refresh_interval',
       DEFAULT_REFRESH_INTERVAL,
@@ -152,12 +144,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupErrorHandling()
   setupTheme()
 
-  const { apiVersion, refreshInterval, displayErrors } = loadAppSettings()
+  const { refreshInterval, displayErrors } = loadAppSettings()
   const reportError = createErrorReporter(displayErrors)
 
   const locale = await getLocale()
   const timezone = await getTimeZone()
-  const context: DashboardContext = { apiVersion, locale, timezone }
+  const context: DashboardContext = { locale, timezone }
 
   let credentials: ShopifyCredentials | null = null
   let credentialError: Error | null = null
