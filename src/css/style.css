@@ -282,7 +282,6 @@ body {
 
 .breakdown-row-total {
   margin-top: 0.5rem;
-  border-top: 0.094rem solid var(--card-border);
   border-bottom: none;
   font-size: 1.25rem;
   font-weight: 700;
