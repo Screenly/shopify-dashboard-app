@@ -3,8 +3,7 @@ import { RESOLUTIONS } from '@screenly/edge-apps/test/screenshots'
 import {
   captureScreenshot,
   getViewScreenshotsDir,
-  MOCK_ORDERS_EMPTY,
-  MOCK_SHOP,
+  makeResolvePayload,
 } from './screenshot-helpers'
 
 function salesByProductPayload(
@@ -73,18 +72,6 @@ const MOCK_MANY_SALES_BY_PRODUCT = salesByProductPayload(
     total_sales: String(2000 - i * 45),
   })),
 )
-
-function makeResolvePayload(salesPayload: unknown) {
-  return (body: string): unknown => {
-    if (body.includes('shopifyqlQuery')) {
-      return salesPayload
-    }
-    if (body.includes('RecentOrders')) {
-      return MOCK_ORDERS_EMPTY
-    }
-    return MOCK_SHOP
-  }
-}
 
 const SALES_BY_PRODUCT_SETTINGS = {
   access_token: 'mock-access-token',

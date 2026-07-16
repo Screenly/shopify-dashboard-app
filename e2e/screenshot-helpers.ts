@@ -19,6 +19,20 @@ export const MOCK_SHOP = {
 
 export const MOCK_ORDERS_EMPTY = { data: { orders: { edges: [] } } }
 
+// Every view's route mock branches the same way: the view's own ShopifyQL
+// payload, empty recent orders, and shop info as the fallback.
+export function makeResolvePayload(salesPayload: unknown) {
+  return (body: string): unknown => {
+    if (body.includes('shopifyqlQuery')) {
+      return salesPayload
+    }
+    if (body.includes('RecentOrders')) {
+      return MOCK_ORDERS_EMPTY
+    }
+    return MOCK_SHOP
+  }
+}
+
 // edge-apps-scripts' own PNG->WebP conversion only scans the top level of
 // screenshots/, so screenshots living in per-view subdirectories are
 // converted directly by callers instead of relying on that flat pass.

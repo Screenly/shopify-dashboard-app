@@ -232,6 +232,8 @@ export function renderLineChart(
           ticks: {
             color: MUTED_TEXT,
             autoSkip: false,
+            maxRotation: 0,
+            minRotation: 0,
             callback: firstLastTickCallback(labels),
           },
         },
@@ -293,6 +295,8 @@ export function renderColumnChart(
           ticks: {
             color: MUTED_TEXT,
             autoSkip: false,
+            maxRotation: 0,
+            minRotation: 0,
             callback: firstLastTickCallback(labels),
           },
         },
