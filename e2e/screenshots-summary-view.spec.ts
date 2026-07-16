@@ -1,31 +1,10 @@
 import { test } from '@playwright/test'
+import { RESOLUTIONS } from '@screenly/edge-apps/test/screenshots'
 import {
-  createMockScreenlyForScreenshots,
-  getScreenshotsDir,
-  RESOLUTIONS,
-  setupClockMock,
-  setupScreenlyJsMock,
-} from '@screenly/edge-apps/test/screenshots'
-import fs from 'fs'
-import path from 'path'
-import sharp from 'sharp'
-
-// edge-apps-scripts' own PNG->WebP conversion only scans the top level of
-// screenshots/, so screenshots living in per-view subdirectories are
-// converted here directly instead of relying on that flat pass.
-function getViewScreenshotsDir(view: string): string {
-  const dir = path.join(getScreenshotsDir(), view)
-  fs.mkdirSync(dir, { recursive: true })
-  return dir
-}
-
-const SHOP_DOMAIN = 'demo-store.myshopify.com'
-
-const MOCK_SHOP = {
-  data: {
-    shop: { name: 'Demo Store', currencyCode: 'USD' },
-  },
-}
+  captureScreenshot,
+  getViewScreenshotsDir,
+  MOCK_SHOP,
+} from './screenshot-helpers'
 
 const MOCK_SALES = {
   data: {
@@ -97,52 +76,27 @@ const MOCK_ORDERS = {
   },
 }
 
-const { screenlyJsContent } = createMockScreenlyForScreenshots(
-  {},
-  {
-    access_token: 'mock-access-token',
-    api_version: '2026-07',
-    display_errors: 'false',
-    override_locale: 'en',
-    override_timezone: 'Europe/London',
-    refresh_interval: '300',
-    shop_domain: SHOP_DOMAIN,
-  },
-)
+function resolvePayload(body: string): unknown {
+  if (body.includes('shopifyqlQuery')) {
+    return body.includes('FROM sales') ? MOCK_SALES : MOCK_SESSIONS
+  }
+  if (body.includes('RecentOrders')) {
+    return MOCK_ORDERS
+  }
+  return MOCK_SHOP
+}
+
+const viewDir = getViewScreenshotsDir('summary-view')
 
 for (const { width, height } of RESOLUTIONS) {
   test(`screenshot ${width}x${height}`, async ({ browser }) => {
-    const screenshotsDir = getViewScreenshotsDir('summary-view')
-
-    const context = await browser.newContext({ viewport: { width, height } })
-    const page = await context.newPage()
-
-    await setupClockMock(page)
-    await setupScreenlyJsMock(page, screenlyJsContent)
-
-    await page.route(`**/${SHOP_DOMAIN}/admin/api/**`, async (route) => {
-      const body = route.request().postData() ?? ''
-      let payload: unknown = MOCK_SHOP
-      if (body.includes('shopifyqlQuery')) {
-        payload = body.includes('FROM sales') ? MOCK_SALES : MOCK_SESSIONS
-      } else if (body.includes('RecentOrders')) {
-        payload = MOCK_ORDERS
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(payload),
-      })
+    await captureScreenshot({
+      browser,
+      width,
+      height,
+      viewDir,
+      settings: { access_token: 'mock-access-token' },
+      resolvePayload,
     })
-
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
-
-    const png = await page.screenshot({ fullPage: false })
-    await sharp(png)
-      .webp()
-      .toFile(path.join(screenshotsDir, `${width}x${height}.webp`))
-
-    await context.close()
   })
 }

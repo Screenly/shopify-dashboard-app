@@ -76,14 +76,17 @@ export function truncateLabel(label: string, maxLength = 22): string {
   return label.length > maxLength ? `${label.slice(0, maxLength - 1)}…` : label
 }
 
-export function foldIntoOther(data: ChartDatum[]): ChartDatum[] {
+export function foldIntoOther(
+  data: ChartDatum[],
+  maxSlices: number = MAX_CATEGORICAL_SLICES,
+): ChartDatum[] {
   const sorted = [...data].sort((a, b) => b.value - a.value)
-  if (sorted.length <= MAX_CATEGORICAL_SLICES) {
+  if (sorted.length <= maxSlices) {
     return sorted
   }
-  const head = sorted.slice(0, MAX_CATEGORICAL_SLICES)
+  const head = sorted.slice(0, maxSlices)
   const otherValue = sorted
-    .slice(MAX_CATEGORICAL_SLICES)
+    .slice(maxSlices)
     .reduce((sum, d) => sum + d.value, 0)
   return [...head, { label: 'Other', value: otherValue }]
 }

@@ -24,7 +24,25 @@ import {
   truncateLabel,
 } from './charts'
 
-const RANKED_BAR_ROW_HEIGHT = 44
+const MIN_RANKED_BAR_ROW_HEIGHT = 44
+const MAX_RANKED_BAR_ROW_HEIGHT = 120
+const TARGET_RANKED_BAR_LIST_HEIGHT = 480
+const MAX_RANKED_BAR_ITEMS_LANDSCAPE = 15
+const MAX_RANKED_BAR_ITEMS_PORTRAIT = 30
+
+function rankedBarRowHeight(itemCount: number): number {
+  return Math.min(
+    MAX_RANKED_BAR_ROW_HEIGHT,
+    Math.max(
+      MIN_RANKED_BAR_ROW_HEIGHT,
+      TARGET_RANKED_BAR_LIST_HEIGHT / itemCount,
+    ),
+  )
+}
+
+function rankedBarThickness(rowHeight: number): number {
+  return Math.round(Math.min(72, Math.max(20, rowHeight * 0.6)))
+}
 
 // No Tooltip plugin: this is digital signage with no pointer/hover input.
 Chart.register(
@@ -68,18 +86,23 @@ export function renderRankedBarChart(
     return
   }
 
-  const sorted = [...bars].sort((a, b) => a.value - b.value) // Chart.js draws category 0 at the bottom
-  setContainerFixedHeight(
-    containerId,
-    sorted.length * RANKED_BAR_ROW_HEIGHT + 16,
-  )
+  const isPortrait = window.matchMedia('(orientation: portrait)').matches
+  const maxItems = isPortrait
+    ? MAX_RANKED_BAR_ITEMS_PORTRAIT
+    : MAX_RANKED_BAR_ITEMS_LANDSCAPE
+  // foldIntoOther also sorts descending, and Chart.js renders category index
+  // 0 at the top for this horizontal (indexAxis: 'y') layout, so the
+  // highest-selling product ends up first.
+  const capped = foldIntoOther(bars, maxItems)
+  const rowHeight = rankedBarRowHeight(capped.length)
+  setContainerFixedHeight(containerId, capped.length * rowHeight + 16)
   renderChart(containerId, {
     type: 'bar',
     data: {
-      labels: sorted.map((b) => truncateLabel(b.label)),
+      labels: capped.map((b) => truncateLabel(b.label)),
       datasets: [
         {
-          data: sorted.map((b) => b.value),
+          data: capped.map((b) => b.value),
           backgroundColor: SINGLE_SERIES_COLOR,
           borderRadius: {
             topLeft: 0,
@@ -87,7 +110,7 @@ export function renderRankedBarChart(
             bottomLeft: 0,
             bottomRight: 4,
           },
-          maxBarThickness: 20,
+          maxBarThickness: rankedBarThickness(rowHeight),
           categoryPercentage: 0.8,
           barPercentage: 0.9,
         },

@@ -50,4 +50,16 @@ describe('foldIntoOther', () => {
     expect(result.length).toBe(7)
     expect(result.some((d) => d.label === 'Other')).toBe(false)
   })
+
+  test('accepts a custom cap, e.g. for a longer ranked list', () => {
+    const slices = Array.from({ length: 20 }, (_, i) => ({
+      label: `Product ${i}`,
+      value: 20 - i,
+    }))
+    const result = foldIntoOther(slices, 15)
+    expect(result.length).toBe(16)
+    expect(result[15].label).toBe('Other')
+    // Products 15..19 have values 5, 4, 3, 2, 1 -> folded sum of 15.
+    expect(result[15].value).toBe(15)
+  })
 })
