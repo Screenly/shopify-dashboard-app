@@ -2,143 +2,21 @@ import './css/style.css'
 import '@screenly/edge-apps/components'
 import {
   getLocale,
-  getSettingWithDefault,
   getTimeZone,
   initTokenRefreshLoop,
   setupErrorHandling,
   setupTheme,
   signalReady,
 } from '@screenly/edge-apps'
-import { createErrorReporter, renderDateRangeSwitcher, showScreen } from './app'
+import { createErrorReporter } from './screen'
 import { getCredentials, withFreshCredentials } from './auth'
 import type { RuntimeState, ShopifyCredentials } from './auth'
-import type { ChartType, DateRange, KpiMetric, ViewName } from './constants'
-import { showView } from './views'
-import { loadViewData } from './view-loaders'
 import {
-  DEFAULT_CHART_TYPE,
-  DEFAULT_DATE_RANGE,
-  DEFAULT_KPI_METRIC,
-  DEFAULT_REFRESH_INTERVAL,
-  DEFAULT_VIEW,
-  isChartType,
-  isDateRange,
-  isKpiMetric,
-  isView,
-} from './constants'
-
-interface DashboardContext {
-  locale: string
-  timezone: string
-}
-
-let currentRange: DateRange = DEFAULT_DATE_RANGE
-let currentView: ViewName = DEFAULT_VIEW
-let currentChartType: ChartType = DEFAULT_CHART_TYPE
-let currentKpiMetric: KpiMetric = DEFAULT_KPI_METRIC
-
-async function loadActiveView(
-  credentials: ShopifyCredentials,
-  context: DashboardContext,
-): Promise<void> {
-  const { token, shopDomain } = credentials
-  const { locale, timezone } = context
-  const range = currentRange
-  const view = currentView
-  const chartType = currentChartType
-  const kpiMetric = currentKpiMetric
-
-  const { shopInfo, render } = await loadViewData(
-    view,
-    shopDomain,
-    token,
-    range,
-    chartType,
-    kpiMetric,
-    locale,
-    timezone,
-  )
-
-  if (range !== currentRange || view !== currentView) {
-    // A newer selection was made while this request was in flight; its own
-    // load will render the correct view/data, so skip this stale response.
-    return
-  }
-
-  const shopNameEl = document.getElementById('shop-name')
-  if (shopNameEl) {
-    shopNameEl.textContent = shopInfo.name
-  }
-
-  renderDateRangeSwitcher(range)
-  showView(view)
-  render()
-  showScreen('dashboard')
-}
-
-function setupDateRangeSwitcher(onChange: () => void): void {
-  const switcher = document.getElementById('date-range-switcher')
-  if (!switcher) {
-    return
-  }
-  switcher.addEventListener('click', (event) => {
-    const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
-      '[data-range]',
-    )
-    const range = button?.dataset.range
-    if (!range || !isDateRange(range) || range === currentRange) {
-      return
-    }
-    currentRange = range
-    renderDateRangeSwitcher(currentRange)
-    onChange()
-  })
-}
-
-interface AppSettings {
-  refreshInterval: number
-  displayErrors: boolean
-}
-
-function loadAppSettings(): AppSettings {
-  const configuredRange = getSettingWithDefault<string>(
-    'default_date_range',
-    DEFAULT_DATE_RANGE,
-  )
-  if (isDateRange(configuredRange)) {
-    currentRange = configuredRange
-  }
-
-  const configuredView = getSettingWithDefault<string>('view', DEFAULT_VIEW)
-  if (isView(configuredView)) {
-    currentView = configuredView
-  }
-
-  const configuredChartType = getSettingWithDefault<string>(
-    'chart_type',
-    DEFAULT_CHART_TYPE,
-  )
-  if (isChartType(configuredChartType)) {
-    currentChartType = configuredChartType
-  }
-
-  const configuredKpiMetric = getSettingWithDefault<string>(
-    'kpi_metric',
-    DEFAULT_KPI_METRIC,
-  )
-  if (isKpiMetric(configuredKpiMetric)) {
-    currentKpiMetric = configuredKpiMetric
-  }
-
-  return {
-    refreshInterval: getSettingWithDefault<number>(
-      'refresh_interval',
-      DEFAULT_REFRESH_INTERVAL,
-    ),
-    displayErrors:
-      getSettingWithDefault<string>('display_errors', 'false') === 'true',
-  }
-}
+  loadActiveView,
+  loadAppSettings,
+  setupDateRangeSwitcher,
+} from './dashboard'
+import type { DashboardContext } from './dashboard'
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupErrorHandling()

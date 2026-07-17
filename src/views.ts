@@ -1,10 +1,12 @@
 import { formatLocalizedDate } from '@screenly/edge-apps'
-import { formatMoney, KPI_PLACEHOLDER } from './app'
-import type { ShopifyqlTableData } from './api'
+import { formatMoney, formatOrderStatus, KPI_PLACEHOLDER } from './kpi-format'
+import type { KpiValues } from './kpi-format'
+import type { ShopifyOrder, ShopifyqlTableData } from './api'
 import type { ChartDatum } from './charts'
 import { renderDonutChart, renderRankedBarChart } from './product-charts'
 import { renderColumnChart, renderLineChart } from './time-series-charts'
-import type { ChartType, ViewName } from './constants'
+import type { ChartType, DateRange, KpiMetric, ViewName } from './constants'
+import { DATE_RANGE_LABELS } from './constants'
 
 export function renderSalesOverTime(
   table: ShopifyqlTableData | null,
@@ -110,6 +112,118 @@ export function renderSalesBreakdown(
 
     item.append(labelEl, valueEl)
     container.appendChild(item)
+  }
+}
+
+export function renderKpis(kpis: KpiValues): void {
+  const fields: [keyof KpiValues, string][] = [
+    ['totalSales', 'kpi-total-sales'],
+    ['orders', 'kpi-orders'],
+    ['sessions', 'kpi-sessions'],
+    ['conversionRate', 'kpi-conversion-rate'],
+  ]
+  for (const [key, id] of fields) {
+    const el = document.getElementById(id)
+    if (el) {
+      el.textContent = kpis[key]
+    }
+  }
+}
+
+const KPI_LABEL_BASE: Record<keyof KpiValues, string> = {
+  totalSales: 'Total Sales',
+  orders: 'Orders',
+  sessions: 'Sessions',
+  conversionRate: 'Conversion Rate',
+}
+
+export function renderKpiLabels(range: DateRange): void {
+  const fields: [keyof KpiValues, string][] = [
+    ['totalSales', 'kpi-label-total-sales'],
+    ['orders', 'kpi-label-orders'],
+    ['sessions', 'kpi-label-sessions'],
+    ['conversionRate', 'kpi-label-conversion-rate'],
+  ]
+  for (const [key, id] of fields) {
+    const el = document.getElementById(id)
+    if (el) {
+      el.textContent = `${KPI_LABEL_BASE[key]} (${DATE_RANGE_LABELS[range]})`
+    }
+  }
+}
+
+const KPI_METRIC_TO_FIELD: Record<KpiMetric, keyof KpiValues> = {
+  total_sales: 'totalSales',
+  orders: 'orders',
+  sessions: 'sessions',
+  conversion_rate: 'conversionRate',
+}
+
+export function renderKpiSpotlight(
+  kpis: KpiValues,
+  metric: KpiMetric,
+  range: DateRange,
+): void {
+  const field = KPI_METRIC_TO_FIELD[metric]
+  const valueEl = document.getElementById('kpi-spotlight-value')
+  const labelEl = document.getElementById('kpi-spotlight-label')
+  if (valueEl) {
+    valueEl.textContent = kpis[field]
+  }
+  if (labelEl) {
+    labelEl.textContent = `${KPI_LABEL_BASE[field]} (${DATE_RANGE_LABELS[range]})`
+  }
+}
+
+export function renderOrders(
+  orders: ShopifyOrder[],
+  locale: string,
+  timezone: string,
+): void {
+  const tbody = document.getElementById('orders-body')
+  const empty = document.getElementById('orders-empty')
+  if (!tbody || !empty) {
+    return
+  }
+
+  tbody.innerHTML = ''
+  empty.hidden = orders.length > 0
+
+  for (const order of orders) {
+    const tr = document.createElement('tr')
+
+    const name = document.createElement('td')
+    name.textContent = order.name
+
+    const date = document.createElement('td')
+    date.textContent = formatLocalizedDate(new Date(order.createdAt), locale, {
+      timeZone: timezone,
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    })
+
+    const total = document.createElement('td')
+    const { amount, currencyCode } = order.totalPriceSet.shopMoney
+    total.textContent = formatMoney(amount, currencyCode, locale)
+
+    const payment = document.createElement('td')
+    const paymentBadge = document.createElement('span')
+    paymentBadge.className = `badge badge-${order.displayFinancialStatus.toLowerCase()}`
+    paymentBadge.textContent = formatOrderStatus(order.displayFinancialStatus)
+    payment.appendChild(paymentBadge)
+
+    const fulfillment = document.createElement('td')
+    const fulfillmentBadge = document.createElement('span')
+    fulfillmentBadge.className = `badge badge-${order.displayFulfillmentStatus.toLowerCase()}`
+    fulfillmentBadge.textContent = formatOrderStatus(
+      order.displayFulfillmentStatus,
+    )
+    fulfillment.appendChild(fulfillmentBadge)
+
+    tr.append(name, date, total, payment, fulfillment)
+    tbody.appendChild(tr)
   }
 }
 

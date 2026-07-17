@@ -7,15 +7,13 @@ import {
   fetchSessionsSummary,
   fetchShopInfo,
 } from './api'
+import { extractKpis } from './kpi-format'
+import type { ChartType, DateRange, KpiMetric, ViewName } from './constants'
 import {
-  extractKpis,
   renderKpiLabels,
   renderKpiSpotlight,
   renderKpis,
   renderOrders,
-} from './app'
-import type { ChartType, DateRange, KpiMetric, ViewName } from './constants'
-import {
   renderSalesBreakdown,
   renderSalesByProduct,
   renderSalesOverTime,

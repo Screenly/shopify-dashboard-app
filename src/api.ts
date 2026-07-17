@@ -6,12 +6,43 @@ import {
   RECENT_ORDERS_QUERY,
   SHOP_QUERY,
   SHOPIFYQL_QUERY,
-  salesByProductQuery,
-  salesBreakdownQuery,
-  salesOverTimeQuery,
-  salesQuery,
-  sessionsQuery,
 } from './constants'
+
+const DATE_RANGE_SHOPIFYQL_SINCE: Record<DateRange, string> = {
+  today: 'today',
+  '7d': '-7d',
+  '30d': '-30d',
+}
+
+function dateRangeSince(range: DateRange): string {
+  return DATE_RANGE_SHOPIFYQL_SINCE[range]
+}
+
+export function salesQuery(range: DateRange): string {
+  return `FROM sales SHOW total_sales, orders SINCE ${dateRangeSince(range)}`
+}
+
+export function sessionsQuery(range: DateRange): string {
+  return `FROM sessions SHOW sessions, conversion_rate SINCE ${dateRangeSince(range)}`
+}
+
+// GROUP BY hour makes sense only within a single day; 7d/30d windows use daily
+// buckets so the chart doesn't render hundreds of points.
+function salesOverTimeGroupBy(range: DateRange): 'hour' | 'day' {
+  return range === 'today' ? 'hour' : 'day'
+}
+
+export function salesOverTimeQuery(range: DateRange): string {
+  return `FROM sales SHOW total_sales GROUP BY ${salesOverTimeGroupBy(range)} SINCE ${dateRangeSince(range)}`
+}
+
+export function salesByProductQuery(range: DateRange): string {
+  return `FROM sales SHOW total_sales GROUP BY product_title SINCE ${dateRangeSince(range)}`
+}
+
+export function salesBreakdownQuery(range: DateRange): string {
+  return `FROM sales SHOW gross_sales, discounts, returns, net_sales, shipping_charges, return_fees, taxes, total_sales SINCE ${dateRangeSince(range)}`
+}
 
 export class AuthError extends Error {
   constructor(message = 'Shopify authentication failed') {
