@@ -36,11 +36,24 @@ export function formatCurrency(
   { currencyCode, locale }: ChartOptions,
   compact = false,
 ): string {
+  if (!compact) {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currencyCode,
+    }).format(value)
+  }
+
+  const { maximumFractionDigits: defaultMaxFractionDigits } =
+    new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currencyCode,
+    }).resolvedOptions()
+
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currencyCode,
-    notation: compact ? 'compact' : 'standard',
-    maximumFractionDigits: compact ? 1 : 2,
+    notation: 'compact',
+    maximumFractionDigits: Math.min(1, defaultMaxFractionDigits ?? 2),
   }).format(value)
 }
 

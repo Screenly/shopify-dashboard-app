@@ -48,11 +48,11 @@ export function renderSalesByProduct(
 ): void {
   const rows = table?.rows ?? []
   const bars: ChartDatum[] = rows
+    .filter((row) => row.product_title)
     .map((row) => ({
-      label: row.product_title || 'Other',
+      label: row.product_title,
       value: Number(row.total_sales ?? 0),
     }))
-    .sort((a, b) => b.value - a.value)
 
   // 'auto' and 'line' (which doesn't fit a category comparison) both fall
   // back to this view's natural default (ranked bar).
