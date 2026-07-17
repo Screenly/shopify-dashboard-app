@@ -14,22 +14,42 @@ export const DATE_RANGE_LABELS: Record<DateRange, string> = {
   '30d': '30D',
 }
 
-const DATE_RANGE_SHOPIFYQL_SINCE: Record<DateRange, string> = {
-  today: 'today',
-  '7d': '-7d',
-  '30d': '-30d',
+export type ViewName =
+  'summary' | 'sales_over_time' | 'sales_by_product' | 'sales_breakdown' | 'kpi'
+
+export const DEFAULT_VIEW: ViewName = 'summary'
+
+export const VIEW_LABELS: Record<ViewName, string> = {
+  summary: 'Summary View',
+  sales_over_time: 'Total Sales Over Time',
+  sales_by_product: 'Total Sales By Product',
+  sales_breakdown: 'Total Sales Breakdown',
+  kpi: 'Key Metric',
 }
 
-export function isDateRange(value: string): value is DateRange {
-  return Object.prototype.hasOwnProperty.call(DATE_RANGE_LABELS, value)
+export type KpiMetric =
+  'total_sales' | 'orders' | 'sessions' | 'conversion_rate'
+
+export const DEFAULT_KPI_METRIC: KpiMetric = 'total_sales'
+
+export const KPI_METRIC_LABELS: Record<KpiMetric, string> = {
+  total_sales: 'Total Sales',
+  orders: 'Orders',
+  sessions: 'Sessions',
+  conversion_rate: 'Conversion Rate',
 }
 
-export function salesQuery(range: DateRange): string {
-  return `FROM sales SHOW total_sales, orders SINCE ${DATE_RANGE_SHOPIFYQL_SINCE[range]}`
-}
+export type ChartType = 'auto' | 'line' | 'bar' | 'donut'
 
-export function sessionsQuery(range: DateRange): string {
-  return `FROM sessions SHOW sessions, conversion_rate SINCE ${DATE_RANGE_SHOPIFYQL_SINCE[range]}`
+// 'auto' lets each view pick its own natural chart type (line for a time
+// series, ranked bar for a per-product comparison) instead of forcing one.
+export const DEFAULT_CHART_TYPE: ChartType = 'auto'
+
+export const CHART_TYPE_LABELS: Record<ChartType, string> = {
+  auto: 'Auto',
+  line: 'Line',
+  bar: 'Bar',
+  donut: 'Donut',
 }
 
 export const SHOP_QUERY = `

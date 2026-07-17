@@ -1,6 +1,6 @@
 # Shopify Dashboard App
 
-Displays Shopify store sales metrics on your Screenly digital signage screens: total sales, order count, sessions, conversion rate, and recent orders.
+Displays Shopify store sales metrics on your Screenly digital signage screens. Choose from several single-purpose views — a KPI summary with recent orders, sales over time, sales by product, a sales breakdown, or a full-screen key metric — configurable per install via the `view` setting.
 
 ## Prerequisites
 
@@ -43,7 +43,6 @@ After `mock-data.yml` is generated, fill in your values under `settings`:
 ```yaml
 settings:
   access_token: '<your Admin API access token>'
-  api_version: '2026-07'
   display_errors: 'false'
   override_locale: ''
   override_timezone: ''
@@ -93,17 +92,32 @@ bun run deploy
 screenly edge-app instance create
 ```
 
+## Views
+
+The `view` setting selects a single view to show on screen. Digital signage is passive viewing with no on-screen interaction, so this is fixed per install rather than switchable on the device.
+
+| View                   | `view` value       | Description                                                                                           |
+| ---------------------- | ------------------ | ----------------------------------------------------------------------------------------------------- |
+| Summary View (default) | `summary`          | KPI cards (total sales, orders, sessions, conversion rate) plus a recent orders table.                |
+| Total Sales Over Time  | `sales_over_time`  | Line or bar chart of sales over the selected date range.                                              |
+| Total Sales By Product | `sales_by_product` | Ranked bar chart or donut chart of sales by product.                                                  |
+| Total Sales Breakdown  | `sales_breakdown`  | Itemized list: gross sales, discounts, returns, net sales, shipping, return fees, taxes, total sales. |
+| Key Metric             | `kpi`              | One KPI (chosen via `kpi_metric`) shown full-screen.                                                  |
+
 ## Configuration
 
-| Setting             | Description                                                           | Type     | Default         |
-| ------------------- | --------------------------------------------------------------------- | -------- | --------------- |
-| `access_token`      | Admin API access token (testing/development only)                     | optional | —               |
-| `api_version`       | Shopify Admin API version used for GraphQL requests                   | optional | `2026-07`       |
-| `display_errors`    | Show errors on screen for debugging purposes                          | optional | `false`         |
-| `override_locale`   | Override the locale used for formatting (e.g. `en`, `fr`, `de`)       | optional | `en`            |
-| `override_timezone` | Override the timezone for date display (e.g. `Europe/London`)         | optional | system timezone |
-| `refresh_interval`  | How often (in seconds) to refresh Shopify data                        | optional | `300`           |
-| `shop_domain`       | The myshopify.com domain of the store (e.g. `my-store.myshopify.com`) | required | —               |
+| Setting              | Description                                                                                                      | Type     | Default         |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- | -------- | --------------- |
+| `access_token`       | Admin API access token (testing/development only)                                                                | optional | —               |
+| `chart_type`         | Preferred chart style for Total Sales Over Time / Total Sales By Product (`auto`, `line`, `bar`, `donut`)        | optional | `auto`          |
+| `default_date_range` | Date range shown when the dashboard loads (`today`, `7d`, `30d`); still changeable on-screen                     | optional | `30d`           |
+| `display_errors`     | Show errors on screen for debugging purposes                                                                     | optional | `false`         |
+| `kpi_metric`         | Which metric to show full-screen in the Key Metric view (`total_sales`, `orders`, `sessions`, `conversion_rate`) | optional | `total_sales`   |
+| `override_locale`    | Override the locale used for formatting (e.g. `en`, `fr`, `de`)                                                  | optional | `en`            |
+| `override_timezone`  | Override the timezone for date display (e.g. `Europe/London`)                                                    | optional | system timezone |
+| `refresh_interval`   | How often (in seconds) to refresh Shopify data                                                                   | optional | `300`           |
+| `shop_domain`        | The myshopify.com domain of the store (e.g. `my-store.myshopify.com`)                                            | required | —               |
+| `view`               | Which view to show (`summary`, `sales_over_time`, `sales_by_product`, `sales_breakdown`, `kpi`)                  | optional | `summary`       |
 
 ## Screenshots
 

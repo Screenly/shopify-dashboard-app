@@ -1,5 +1,4 @@
 import { describe, expect, test } from 'bun:test'
-import '@screenly/edge-apps/test'
 import type { ShopifyqlTableData } from './api'
 import {
   extractKpis,
@@ -7,7 +6,7 @@ import {
   formatOrderStatus,
   formatPercent,
   KPI_PLACEHOLDER,
-} from './app'
+} from './kpi-format'
 
 const SALES_TABLE: ShopifyqlTableData = {
   columns: [

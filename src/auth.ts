@@ -3,7 +3,7 @@ import {
   getSettingWithDefault,
 } from '@screenly/edge-apps'
 import { AuthError } from './api'
-import type { ErrorReporter } from './app'
+import type { ErrorReporter } from './screen'
 
 export interface ShopifyCredentials {
   token: string
