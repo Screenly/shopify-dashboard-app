@@ -55,7 +55,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       reportError,
       async (creds) => {
         if (!creds.shopDomain) {
-          reportError('Please set the Shop Domain in settings.')
+          reportError(
+            'No shop domain available. Check the Shopify connection in the Screenly web console, or set the Shop Domain setting for local testing.',
+          )
           return
         }
         await loadActiveView(creds, context)
