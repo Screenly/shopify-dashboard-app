@@ -87,7 +87,7 @@ export function showEmptyState(containerId: string): void {
   const container = document.getElementById(containerId)
   if (container) {
     container.innerHTML =
-      '<div class="chart-empty">No data for this date range.</div>'
+      '<div class="chart-empty m-auto text-[1.25rem] text-white/70">No data for this date range.</div>'
   }
 }
 
