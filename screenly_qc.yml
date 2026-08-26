@@ -111,8 +111,11 @@ settings:
     type: string
     title: Shop Domain
     optional: true
-    help_text: |
-      For testing only. The myshopify.com domain of the store to display data from (e.g. my-store.myshopify.com). In production, this is provided by the Shopify integration and this setting is not needed.
+    help_text:
+      properties:
+        advanced: true
+        help_text: For testing only. The myshopify.com domain of the store to display data from (e.g. my-store.myshopify.com). In production, this is provided by the Shopify integration and this setting is not needed.
+      schema_version: 1
   view:
     type: string
     default_value: summary
