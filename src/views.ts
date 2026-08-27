@@ -96,13 +96,11 @@ export function renderSalesBreakdown(
     const isTotal = column === 'total_sales'
     const item = document.createElement('div')
     item.className = isTotal
-      ? 'breakdown-row breakdown-row-total flex items-center justify-between py-[0.938rem] border-b-[0.047rem] border-white/10 last:border-b-0 mt-2 text-[1.25rem] font-bold portrait:text-[1.5rem]'
-      : 'breakdown-row flex items-center justify-between py-[0.938rem] border-b-[0.047rem] border-white/10 last:border-b-0 text-[1.146rem] portrait:text-[1.375rem]'
+      ? 'breakdown-row breakdown-row-total'
+      : 'breakdown-row'
 
     const labelEl = document.createElement('span')
-    labelEl.className = isTotal
-      ? 'breakdown-label text-white'
-      : 'breakdown-label text-white/70'
+    labelEl.className = 'breakdown-label'
     labelEl.textContent = label
 
     const valueEl = document.createElement('span')
@@ -191,21 +189,14 @@ export function renderOrders(
   tbody.innerHTML = ''
   empty.hidden = orders.length > 0
 
-  const cellClassName =
-    'py-[0.938rem] px-4 border-b-[0.047rem] border-white/10 group-last:border-b-0'
-  const badgeClassName =
-    'inline-block py-1 px-3 rounded-[62.438rem] text-[0.938rem] font-semibold bg-white/[0.12] text-white/[0.85] portrait:text-[1.125rem]'
-
   for (const order of orders) {
     const tr = document.createElement('tr')
     tr.className = 'group'
 
     const name = document.createElement('td')
-    name.className = cellClassName
     name.textContent = order.name
 
     const date = document.createElement('td')
-    date.className = `${cellClassName} portrait:[&:nth-child(2)]:hidden`
     date.textContent = formatLocalizedDate(new Date(order.createdAt), locale, {
       timeZone: timezone,
       month: 'short',
@@ -215,21 +206,18 @@ export function renderOrders(
     })
 
     const total = document.createElement('td')
-    total.className = cellClassName
     const { amount, currencyCode } = order.totalPriceSet.shopMoney
     total.textContent = formatMoney(amount, currencyCode, locale)
 
     const payment = document.createElement('td')
-    payment.className = cellClassName
     const paymentBadge = document.createElement('span')
-    paymentBadge.className = `badge badge-${order.displayFinancialStatus.toLowerCase()} ${badgeClassName}`
+    paymentBadge.className = `badge badge-${order.displayFinancialStatus.toLowerCase()}`
     paymentBadge.textContent = formatOrderStatus(order.displayFinancialStatus)
     payment.appendChild(paymentBadge)
 
     const fulfillment = document.createElement('td')
-    fulfillment.className = cellClassName
     const fulfillmentBadge = document.createElement('span')
-    fulfillmentBadge.className = `badge badge-${order.displayFulfillmentStatus.toLowerCase()} ${badgeClassName}`
+    fulfillmentBadge.className = `badge badge-${order.displayFulfillmentStatus.toLowerCase()}`
     fulfillmentBadge.textContent = formatOrderStatus(
       order.displayFulfillmentStatus,
     )
