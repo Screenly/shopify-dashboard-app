@@ -106,18 +106,20 @@ The `view` setting selects a single view to show on screen. Digital signage is p
 
 ## Configuration
 
-| Setting              | Description                                                                                                                                                             | Type     | Default         |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------- |
-| `access_token`       | Admin API access token (testing/development only)                                                                                                                       | optional | —               |
-| `chart_type`         | Preferred chart style for Total Sales Over Time / Total Sales By Product (`auto`, `line`, `bar`, `donut`)                                                               | optional | `auto`          |
-| `default_date_range` | Date range shown when the dashboard loads (`today`, `7d`, `30d`); still changeable on-screen                                                                            | optional | `30d`           |
-| `display_errors`     | Show errors on screen for debugging purposes                                                                                                                            | optional | `false`         |
-| `kpi_metric`         | Which metric to show full-screen in the Key Metric view (`total_sales`, `orders`, `sessions`, `conversion_rate`)                                                        | optional | `total_sales`   |
-| `override_locale`    | Override the locale used for formatting (e.g. `en`, `fr`, `de`)                                                                                                         | optional | `en`            |
-| `override_timezone`  | Override the timezone for date display (e.g. `Europe/London`)                                                                                                           | optional | system timezone |
-| `refresh_interval`   | How often (in seconds) to refresh Shopify data                                                                                                                          | optional | `300`           |
-| `shop_domain`        | The myshopify.com domain of the store (e.g. `my-store.myshopify.com`). Testing/development only — in production the shop domain is provided by the Shopify integration. | optional | —               |
-| `view`               | Which view to show (`summary`, `sales_over_time`, `sales_by_product`, `sales_breakdown`, `kpi`)                                                                         | optional | `summary`       |
+Settings appear in the install/edit UI in the order below. `chart_type` and `kpi_metric` use `depends_on` in the manifest, so they're only shown while `view` is set to a view that uses them. `display_errors`, `refresh_interval`, `shop_domain`, and `access_token` are marked `advanced`, so they're tucked under "Advanced".
+
+| Setting              | Description                                                                                                                                                                   | Type     | Default         |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------- |
+| `view`               | Which view to show (`summary`, `sales_over_time`, `sales_by_product`, `sales_breakdown`, `kpi`)                                                                               | optional | `summary`       |
+| `chart_type`         | Preferred chart style for Total Sales Over Time / Total Sales By Product (`auto`, `line`, `bar`, `donut`). Shown only when `view` is `sales_over_time` or `sales_by_product`. | optional | `auto`          |
+| `kpi_metric`         | Which metric to show full-screen in the Key Metric view (`total_sales`, `orders`, `sessions`, `conversion_rate`). Shown only when `view` is `kpi`.                            | optional | `total_sales`   |
+| `default_date_range` | Date range shown when the dashboard loads (`today`, `7d`, `30d`); still changeable on-screen                                                                                  | optional | `30d`           |
+| `display_errors`     | Show errors on screen for debugging purposes                                                                                                                                  | optional | `false`         |
+| `refresh_interval`   | How often (in seconds) to refresh Shopify data                                                                                                                                | optional | `300`           |
+| `shop_domain`        | The myshopify.com domain of the store (e.g. `my-store.myshopify.com`). Testing/development only — in production the shop domain is provided by the Shopify integration.       | optional | —               |
+| `access_token`       | Admin API access token (testing/development only)                                                                                                                             | optional | —               |
+| `override_timezone`  | Override the timezone for date display (e.g. `Europe/London`)                                                                                                                 | optional | system timezone |
+| `override_locale`    | Override the locale used for formatting (e.g. `en`, `fr`, `de`)                                                                                                               | optional | `en`            |
 
 ## Screenshots
 
