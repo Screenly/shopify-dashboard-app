@@ -120,6 +120,21 @@ async function graphqlRequest<T>(
   if (res.status === 401 || res.status === 403) {
     throw new AuthError()
   }
+  if (res.status === 404) {
+    throw new Error(
+      `Shop not found: ${shopDomain}. Check the shop domain in your app settings.`,
+    )
+  }
+  if (res.status === 429) {
+    throw new Error(
+      'Shopify API rate limit exceeded. The dashboard will retry on its next refresh.',
+    )
+  }
+  if (res.status >= 500) {
+    throw new Error(
+      `Shopify is temporarily unavailable (${res.status}). Please try again later.`,
+    )
+  }
   if (!res.ok) {
     throw new Error(`Shopify API request failed: ${res.status}`)
   }
