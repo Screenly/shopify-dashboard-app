@@ -15,7 +15,7 @@
       <div id="app">
         <app-header class="header" show-date></app-header>
         <main class="content">
-          <div id="dashboard" hidden>
+          <div id="dashboard" hidden class="dashboard-view">
             <div class="dashboard-toolbar">
               <h1 id="shop-name" class="shop-name"></h1>
               <div
@@ -134,11 +134,11 @@
             </div>
           </div>
 
-          <div id="error-screen" hidden>
+          <div id="error-screen" hidden class="error-screen">
             <div class="error-card">
               <div class="error-card-left">
-                <h2>Something went wrong</h2>
-                <p>
+                <h2 class="error-card-title">Something went wrong</h2>
+                <p class="error-card-description">
                   The Shopify data could not be loaded. Please check your
                   configuration or contact your administrator.
                 </p>

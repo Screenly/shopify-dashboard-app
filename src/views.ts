@@ -93,18 +93,18 @@ export function renderSalesBreakdown(
   container.innerHTML = ''
   for (const [column, label] of BREAKDOWN_ROWS) {
     const amount = row?.[column]
+    const isTotal = column === 'total_sales'
     const item = document.createElement('div')
-    item.className =
-      column === 'total_sales'
-        ? 'breakdown-row breakdown-row-total'
-        : 'breakdown-row'
+    item.className = isTotal
+      ? 'breakdown-row breakdown-row-total'
+      : 'breakdown-row'
 
     const labelEl = document.createElement('span')
     labelEl.className = 'breakdown-label'
     labelEl.textContent = label
 
     const valueEl = document.createElement('span')
-    valueEl.className = 'breakdown-value'
+    valueEl.className = 'breakdown-value tabular-nums'
     valueEl.textContent =
       amount === undefined
         ? KPI_PLACEHOLDER
@@ -191,6 +191,7 @@ export function renderOrders(
 
   for (const order of orders) {
     const tr = document.createElement('tr')
+    tr.className = 'group'
 
     const name = document.createElement('td')
     name.textContent = order.name

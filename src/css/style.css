@@ -1,428 +1,205 @@
-@import '@screenly/edge-apps/styles';
+/* Skip Tailwind's preflight: it resets `border` on every element (including
+   custom-element hosts like <app-header>), which strips their shadow-DOM
+   :host styling. The design system's own reset.css already normalizes
+   box-sizing/margin/padding, so preflight isn't needed here. */
+@layer theme, base, utilities;
 
-:root {
-  --card-bg: rgba(255, 255, 255, 0.06);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --card-radius: 1.667rem;
-  --card-padding: 1.875rem;
-  --grid-gap: 1.25rem;
-  --text-primary: #ffffff;
-  --text-muted: rgba(255, 255, 255, 0.7);
-  --badge-positive-bg: rgba(32, 201, 51, 0.2);
-  --badge-positive-text: #7ce88a;
-  --badge-neutral-bg: rgba(255, 255, 255, 0.12);
-  --badge-neutral-text: rgba(255, 255, 255, 0.85);
-  --badge-warning-bg: rgba(252, 180, 0, 0.2);
-  --badge-warning-text: #ffd66e;
+@import 'tailwindcss/theme.css' layer(theme);
+/* @screenly/edge-apps/styles goes in the `base` layer so Tailwind utilities
+   (declared after `base` above) always win the cascade, regardless of
+   selector specificity — unlayered CSS otherwise beats layered CSS. */
+@import '@screenly/edge-apps/styles' layer(base);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@utility card {
+  @apply p-[1.875rem] bg-white/[0.06] border-[0.047rem] border-white/10 rounded-[1.667rem];
 }
 
-* {
-  box-sizing: border-box;
+@utility pill {
+  @apply bg-white/[0.06] border-[0.047rem] border-white/10 rounded-[62.438rem];
 }
+
+/* App-specific styles */
 
 body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  color: var(--text-primary);
-  font-family: 'Inter', system-ui, sans-serif;
-  background: linear-gradient(160deg, #10241c 0%, #0b1512 55%, #060a08 100%);
+  @apply text-white bg-[linear-gradient(160deg,#10241c_0%,#0b1512_55%,#060a08_100%)];
 }
 
 #app {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
+  @apply flex flex-col w-full h-full;
 }
 
 .header {
-  border-radius: 1.042rem;
-  padding-right: 1.25rem;
-  background: rgba(0, 0, 0, 0.2);
+  @apply rounded-[1.042rem] pr-5 bg-black/20;
 }
 
 .content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 2.5rem 5rem 3.75rem;
-  overflow: hidden;
-}
-
-#dashboard[hidden],
-#error-screen[hidden],
-.dashboard-view[hidden],
-.orders-empty[hidden] {
-  display: none;
-}
-
-#dashboard {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--grid-gap);
-  overflow: hidden;
+  @apply flex-1 flex flex-col pt-10 px-20 pb-[3.75rem] overflow-hidden portrait:px-10;
 }
 
 .dashboard-view {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--grid-gap);
-  overflow: hidden;
-}
-
-.shop-name {
-  margin: 0;
-  font-size: 2.344rem;
-  font-weight: 700;
-  line-height: 3rem;
+  @apply flex-1 flex flex-col gap-5 overflow-hidden [&[hidden]]:hidden;
 }
 
 .dashboard-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  flex-wrap: wrap;
+  @apply flex items-center justify-between gap-5 flex-wrap;
+}
+
+.shop-name {
+  @apply m-0 text-[2.344rem] font-bold leading-[3rem] portrait:text-[3rem] portrait:leading-[3.75rem];
 }
 
 .date-range-switcher {
-  display: inline-flex;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  background: var(--card-bg);
-  border: 0.047rem solid var(--card-border);
-  border-radius: 62.438rem;
+  @apply pill inline-flex gap-1 p-1;
 }
 
 .date-range-option {
-  padding: 0.5rem 1.25rem;
-  font-size: 1.042rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  border-radius: 62.438rem;
-  cursor: pointer;
+  @apply py-2 px-5 text-[1.042rem] font-semibold text-white/70 bg-transparent border-none rounded-[62.438rem] cursor-pointer portrait:text-[1.375rem] portrait:py-2.5 portrait:px-6;
 }
 
 .date-range-option.active {
-  color: var(--text-primary);
+  color: #ffffff;
   background: rgba(255, 255, 255, 0.14);
 }
 
 .kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--grid-gap);
+  @apply grid grid-cols-4 gap-5 portrait:grid-cols-2;
 }
 
 .kpi-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: var(--card-padding);
-  background: var(--card-bg);
-  border: 0.047rem solid var(--card-border);
-  border-radius: var(--card-radius);
+  @apply card flex flex-col gap-3;
 }
 
 .kpi-label {
-  font-size: 1.042rem;
-  font-weight: 600;
-  line-height: 1.5rem;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  @apply text-[1.042rem] font-semibold text-white/70 tracking-wider uppercase leading-6 portrait:text-[1.375rem] portrait:leading-8;
 }
 
 .kpi-value {
-  font-size: 2.813rem;
-  font-weight: 700;
-  line-height: 3.5rem;
-  white-space: nowrap;
+  @apply text-[2.813rem] font-bold leading-[3.5rem] whitespace-nowrap portrait:text-[3.25rem] portrait:leading-[4rem];
+}
+
+.kpi-spotlight-card {
+  @apply card flex-1 flex flex-col items-center justify-center gap-5 overflow-hidden;
+}
+
+.kpi-spotlight-label {
+  @apply text-[1.667rem] font-semibold text-white/70 tracking-wider uppercase portrait:text-[2rem];
+}
+
+.kpi-spotlight-value {
+  @apply text-[10rem] font-bold leading-none whitespace-nowrap portrait:text-[7rem];
+}
+
+.chart-card {
+  @apply card flex-1 flex flex-col gap-5 overflow-hidden;
+}
+
+.chart-card-title {
+  @apply m-0 text-[1.458rem] font-bold leading-[1.875rem] portrait:text-[1.75rem] portrait:leading-[2.25rem];
+}
+
+.chart-container {
+  @apply flex-1 relative min-h-0;
+}
+
+.breakdown-list {
+  @apply flex-1 flex flex-col overflow-hidden;
+}
+
+.breakdown-row {
+  @apply flex items-center justify-between py-[0.938rem] border-b-[0.047rem] border-white/10 last:border-b-0 text-[1.146rem] portrait:text-[1.375rem];
+}
+
+.breakdown-row-total {
+  @apply mt-2 text-[1.25rem] font-bold portrait:text-[1.5rem];
+}
+
+.breakdown-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.breakdown-row-total .breakdown-label {
+  color: #ffffff;
+}
+
+.breakdown-value {
+  @apply tabular-nums;
 }
 
 .orders-card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: var(--card-padding);
-  background: var(--card-bg);
-  border: 0.047rem solid var(--card-border);
-  border-radius: var(--card-radius);
-  overflow: hidden;
+  @apply card flex-1 flex flex-col gap-5 overflow-hidden;
 }
 
 .orders-title {
-  margin: 0;
-  font-size: 1.458rem;
-  font-weight: 700;
-  line-height: 1.875rem;
+  @apply m-0 text-[1.458rem] font-bold leading-[1.875rem];
 }
 
 .orders-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 1.146rem;
-  line-height: 1.667rem;
+  @apply w-full border-collapse text-[1.146rem] leading-[1.667rem] portrait:text-[1.375rem] portrait:leading-8;
 }
 
 .orders-table th {
-  padding: 0.75rem 1rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-align: left;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.938rem;
-  border-bottom: 0.047rem solid var(--card-border);
+  @apply py-3 px-4 font-semibold text-white/70 text-left uppercase tracking-wider text-[0.938rem] border-b-[0.047rem] border-white/10 portrait:text-[1.125rem];
+}
+
+.orders-table th:nth-child(2) {
+  @apply portrait:hidden;
 }
 
 .orders-table td {
-  padding: 0.938rem 1rem;
-  border-bottom: 0.047rem solid var(--card-border);
+  @apply py-[0.938rem] px-4 border-b-[0.047rem] border-white/10 group-last:border-b-0;
 }
 
-.orders-table tbody tr:last-child td {
-  border-bottom: none;
+.orders-table td:nth-child(2) {
+  @apply portrait:hidden;
+}
+
+.orders-empty {
+  @apply m-auto text-[1.25rem] text-white/70 [&[hidden]]:hidden;
 }
 
 .badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 62.438rem;
-  font-size: 0.938rem;
-  font-weight: 600;
-  background: var(--badge-neutral-bg);
-  color: var(--badge-neutral-text);
+  @apply inline-block py-1 px-3 rounded-[62.438rem] text-[0.938rem] font-semibold bg-white/[0.12] text-white/[0.85] portrait:text-[1.125rem];
 }
 
 .badge-paid,
 .badge-fulfilled {
-  background: var(--badge-positive-bg);
-  color: var(--badge-positive-text);
+  background: rgba(32, 201, 51, 0.2);
+  color: #7ce88a;
 }
 
 .badge-pending,
 .badge-unfulfilled,
 .badge-partially_paid,
 .badge-partially_fulfilled {
-  background: var(--badge-warning-bg);
-  color: var(--badge-warning-text);
+  background: rgba(252, 180, 0, 0.2);
+  color: #ffd66e;
 }
 
-.orders-empty {
-  margin: auto;
-  font-size: 1.25rem;
-  color: var(--text-muted);
-}
-
-.chart-card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: var(--card-padding);
-  background: var(--card-bg);
-  border: 0.047rem solid var(--card-border);
-  border-radius: var(--card-radius);
-  overflow: hidden;
-}
-
-.chart-card-title {
-  margin: 0;
-  font-size: 1.458rem;
-  font-weight: 700;
-  line-height: 1.875rem;
-}
-
-.chart-container {
-  flex: 1;
-  position: relative;
-  min-height: 0;
-}
-
-.chart-empty {
-  margin: auto;
-  font-size: 1.25rem;
-  color: var(--text-muted);
-}
-
-.breakdown-list {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.breakdown-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.938rem 0;
-  font-size: 1.146rem;
-  border-bottom: 0.047rem solid var(--card-border);
-}
-
-.breakdown-row:last-child {
-  border-bottom: none;
-}
-
-.breakdown-label {
-  color: var(--text-muted);
-}
-
-.breakdown-value {
-  font-variant-numeric: tabular-nums;
-}
-
-.breakdown-row-total {
-  margin-top: 0.5rem;
-  border-bottom: none;
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
-.breakdown-row-total .breakdown-label {
-  color: var(--text-primary);
-}
-
-.kpi-spotlight-card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.25rem;
-  padding: var(--card-padding);
-  background: var(--card-bg);
-  border: 0.047rem solid var(--card-border);
-  border-radius: var(--card-radius);
-  overflow: hidden;
-}
-
-.kpi-spotlight-label {
-  font-size: 1.667rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.kpi-spotlight-value {
-  font-size: 10rem;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-#error-screen {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.error-screen {
+  @apply flex-1 flex items-center justify-center [&[hidden]]:hidden;
 }
 
 .error-card {
-  display: flex;
-  gap: 2.5rem;
-  max-width: 70rem;
-  padding: var(--card-padding);
-  background: var(--card-bg);
-  border: 0.047rem solid var(--card-border);
-  border-radius: var(--card-radius);
+  @apply card flex gap-10 max-w-[70rem];
 }
 
-.error-card h2 {
-  margin: 0 0 1rem;
-  font-size: 1.875rem;
+.error-card-title {
+  @apply m-0 mb-4 text-[1.875rem];
 }
 
-.error-card p {
-  margin: 0;
-  font-size: 1.146rem;
-  line-height: 1.667rem;
-  color: var(--text-muted);
+.error-card-description {
+  @apply m-0 text-[1.146rem] leading-[1.667rem] text-white/70;
 }
 
 .error-detail-label {
-  font-size: 0.938rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  margin-bottom: 0.75rem;
+  @apply text-[0.938rem] font-semibold uppercase tracking-wider text-white/70 mb-3;
 }
 
 .error-detail-message {
-  word-break: break-word;
+  @apply break-words;
 }
 
-@media (orientation: portrait) {
-  .content {
-    padding: 2.5rem 2.5rem 3.75rem;
-  }
-
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .shop-name {
-    font-size: 3rem;
-    line-height: 3.75rem;
-  }
-
-  .date-range-option {
-    font-size: 1.375rem;
-    padding: 0.625rem 1.5rem;
-  }
-
-  .kpi-value {
-    font-size: 3.25rem;
-    line-height: 4rem;
-  }
-
-  .kpi-label,
-  .orders-table {
-    font-size: 1.375rem;
-    line-height: 2rem;
-  }
-
-  .orders-table th,
-  .badge {
-    font-size: 1.125rem;
-  }
-
-  .orders-table td:nth-child(2) {
-    display: none;
-  }
-
-  .orders-table th:nth-child(2) {
-    display: none;
-  }
-
-  .chart-card-title {
-    font-size: 1.75rem;
-    line-height: 2.25rem;
-  }
-
-  .breakdown-row {
-    font-size: 1.375rem;
-  }
-
-  .breakdown-row-total {
-    font-size: 1.5rem;
-  }
-
-  .kpi-spotlight-label {
-    font-size: 2rem;
-  }
-
-  .kpi-spotlight-value {
-    font-size: 7rem;
-  }
+.chart-empty {
+  @apply m-auto text-[1.25rem] text-white/70;
 }
