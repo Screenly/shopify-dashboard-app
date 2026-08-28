@@ -7,24 +7,90 @@ categories:
   - Dashboards
 ready_signal: true
 settings:
-  access_token:
-    type: secret
-    title: Access Token
-    optional: true
-    help_text:
-      properties:
-        help_text: For testing only. In production, the access token is fetched dynamically via the Screenly OAuth service.
-        type: oauth:shopify:access_token
-      schema_version: 1
-  api_version:
+  view:
     type: string
-    default_value: '2026-07'
-    title: API Version
+    default_value: summary
+    title: View
     optional: true
     help_text:
       properties:
-        advanced: true
-        help_text: The Shopify Admin API version used for GraphQL requests.
+        help_text: Which single view to show on screen. Digital signage is passive viewing with no on-screen interaction, so this is fixed per install rather than switchable on the device.
+        options:
+          - label: Summary View
+            value: summary
+          - label: Total Sales Over Time
+            value: sales_over_time
+          - label: Total Sales By Product
+            value: sales_by_product
+          - label: Total Sales Breakdown
+            value: sales_breakdown
+          - label: Key Metric
+            value: kpi
+        type: select
+      schema_version: 1
+  chart_type:
+    type: string
+    default_value: auto
+    title: Chart Type
+    optional: true
+    help_text:
+      properties:
+        depends_on:
+          setting: view
+          values:
+            - sales_over_time
+            - sales_by_product
+        help_text: Preferred chart style for the Total Sales Over Time and Total Sales By Product views. Auto picks the best fit for each view (line for the time series, bar for the product comparison). Ignored by chart types that don't fit a given view.
+        options:
+          - label: Auto
+            value: auto
+          - label: Line
+            value: line
+          - label: Bar
+            value: bar
+          - label: Donut
+            value: donut
+        type: select
+      schema_version: 1
+  kpi_metric:
+    type: string
+    default_value: total_sales
+    title: Key Metric
+    optional: true
+    help_text:
+      properties:
+        depends_on:
+          setting: view
+          values:
+            - kpi
+        help_text: Which metric to show full-screen in the Key Metric view.
+        options:
+          - label: Total Sales
+            value: total_sales
+          - label: Orders
+            value: orders
+          - label: Sessions
+            value: sessions
+          - label: Conversion Rate
+            value: conversion_rate
+        type: select
+      schema_version: 1
+  default_date_range:
+    type: string
+    default_value: 30d
+    title: Default Date Range
+    optional: true
+    help_text:
+      properties:
+        help_text: The date range shown on the dashboard when it loads. Can still be changed on-screen using the switcher.
+        options:
+          - label: Today
+            value: today
+          - label: 7 Days
+            value: 7d
+          - label: 30 Days
+            value: 30d
+        type: select
       schema_version: 1
   display_errors:
     type: string
@@ -37,20 +103,6 @@ settings:
         help_text: For debugging purposes to display errors on the screen.
         type: boolean
       schema_version: 1
-  override_locale:
-    type: string
-    default_value: ''
-    title: Override Locale
-    optional: true
-    help_text: |
-      Override the default locale with a supported language code (e.g., en, fr, de). Defaults to English if not specified.
-  override_timezone:
-    type: string
-    default_value: ''
-    title: Override Timezone
-    optional: true
-    help_text: |
-      Override the default timezone with a supported timezone identifier (e.g., Europe/London, America/New_York). Defaults to the system timezone if left blank.
   refresh_interval:
     type: string
     default_value: '300'
@@ -65,6 +117,32 @@ settings:
   shop_domain:
     type: string
     title: Shop Domain
-    optional: false
+    optional: true
+    help_text:
+      properties:
+        advanced: true
+        help_text: For testing only. The myshopify.com domain of the store to display data from (e.g. my-store.myshopify.com). In production, this is provided by the Shopify integration and this setting is not needed.
+      schema_version: 1
+  access_token:
+    type: secret
+    title: Access Token
+    optional: true
+    help_text:
+      properties:
+        help_text: For testing only. In production, the access token is fetched dynamically via the Screenly OAuth service.
+        type: oauth:shopify:access_token
+      schema_version: 1
+  override_timezone:
+    type: string
+    default_value: ''
+    title: Override Timezone
+    optional: true
     help_text: |
-      The myshopify.com domain of the store to display data from (e.g. my-store.myshopify.com). In production, this is provided by the Shopify integration.
+      Override the default timezone with a supported timezone identifier (e.g., Europe/London, America/New_York). Defaults to the system timezone if left blank.
+  override_locale:
+    type: string
+    default_value: ''
+    title: Override Locale
+    optional: true
+    help_text: |
+      Override the default locale with a supported language code (e.g., en, fr, de). Defaults to English if not specified.

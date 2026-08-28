@@ -2,80 +2,32 @@ import './css/style.css'
 import '@screenly/edge-apps/components'
 import {
   getLocale,
-  getSettingWithDefault,
   getTimeZone,
   initTokenRefreshLoop,
   setupErrorHandling,
   setupTheme,
   signalReady,
 } from '@screenly/edge-apps'
-import {
-  fetchRecentOrders,
-  fetchSalesSummary,
-  fetchSessionsSummary,
-  fetchShopInfo,
-} from './api'
-import {
-  createErrorReporter,
-  extractKpis,
-  renderKpis,
-  renderOrders,
-  showScreen,
-} from './app'
+import { createErrorReporter } from './screen'
 import { getCredentials, withFreshCredentials } from './auth'
 import type { RuntimeState, ShopifyCredentials } from './auth'
-import { DEFAULT_API_VERSION, DEFAULT_REFRESH_INTERVAL } from './constants'
-
-interface DashboardContext {
-  apiVersion: string
-  locale: string
-  timezone: string
-}
-
-async function loadDashboard(
-  credentials: ShopifyCredentials,
-  context: DashboardContext,
-): Promise<void> {
-  const { token, shopDomain } = credentials
-  const { apiVersion, locale, timezone } = context
-  const [shopInfo, salesTable, sessionsTable, orders] = await Promise.all([
-    fetchShopInfo(shopDomain, apiVersion, token),
-    fetchSalesSummary(shopDomain, apiVersion, token),
-    fetchSessionsSummary(shopDomain, apiVersion, token),
-    fetchRecentOrders(shopDomain, apiVersion, token),
-  ])
-
-  const shopNameEl = document.getElementById('shop-name')
-  if (shopNameEl) {
-    shopNameEl.textContent = shopInfo.name
-  }
-
-  renderKpis(
-    extractKpis(salesTable, sessionsTable, shopInfo.currencyCode, locale),
-  )
-  renderOrders(orders, locale, timezone)
-  showScreen('dashboard')
-}
+import {
+  loadActiveView,
+  loadAppSettings,
+  setupDateRangeSwitcher,
+} from './dashboard'
+import type { DashboardContext } from './dashboard'
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupErrorHandling()
   setupTheme()
 
-  const apiVersion = getSettingWithDefault<string>(
-    'api_version',
-    DEFAULT_API_VERSION,
-  )
-  const refreshInterval = getSettingWithDefault<number>(
-    'refresh_interval',
-    DEFAULT_REFRESH_INTERVAL,
-  )
-  const displayErrors =
-    getSettingWithDefault<string>('display_errors', 'false') === 'true'
+  const { refreshInterval, displayErrors } = loadAppSettings()
   const reportError = createErrorReporter(displayErrors)
 
   const locale = await getLocale()
   const timezone = await getTimeZone()
-  const context: DashboardContext = { apiVersion, locale, timezone }
+  const context: DashboardContext = { locale, timezone }
 
   let credentials: ShopifyCredentials | null = null
   let credentialError: Error | null = null
@@ -103,12 +55,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       reportError,
       async (creds) => {
         if (!creds.shopDomain) {
-          reportError('Please set the Shop Domain in settings.')
+          reportError(
+            'No shop domain available. Check the Shopify connection in the Screenly web console, or set the Shop Domain setting for local testing.',
+          )
           return
         }
-        await loadDashboard(creds, context)
+        await loadActiveView(creds, context)
       },
     )
+
+  setupDateRangeSwitcher(() => {
+    void run()
+  })
 
   await run()
   signalReady()
