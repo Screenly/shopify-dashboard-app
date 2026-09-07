@@ -52,7 +52,9 @@ settings:
 
 ### Getting a test access token
 
-The `access_token` setting is for testing and development only. In production, tokens are delivered by the Screenly OAuth service via the Shopify integration (the OAuth wiring is deferred for now — see `src/auth.ts`).
+In production, `access_token` is resolved automatically by the Screenly OAuth service once Shopify is connected in the Screenly web console under Integrations (see `src/auth.ts`). It's `optional: false` and backed by `type: oauth:shopify:access_token` in the manifest, so real installs never show it as an editable field — Screenly's install/edit UI hides any setting with that OAuth-backed type unconditionally, regardless of `advanced`.
+
+For local development (`bun run dev`), set a raw access token directly in `mock-data.yml` instead, since the dev server reads settings from that file rather than going through the OAuth flow.
 
 To get a token for development:
 
@@ -106,7 +108,7 @@ The `view` setting selects a single view to show on screen. Digital signage is p
 
 ## Configuration
 
-Settings appear in the install/edit UI in the order below. `chart_type` and `kpi_metric` use `depends_on` in the manifest, so they're only shown while `view` is set to a view that uses them. `display_errors`, `refresh_interval`, `shop_domain`, and `access_token` are marked `advanced`, so they're tucked under "Advanced".
+Settings appear in the install/edit UI in the order below. `chart_type` and `kpi_metric` use `depends_on` in the manifest, so they're only shown while `view` is set to a view that uses them. `display_errors`, `refresh_interval`, and `shop_domain` are marked `advanced`, so they're tucked under "Advanced". `access_token` is never shown in the install/edit UI at all — see [Getting a test access token](#getting-a-test-access-token).
 
 | Setting              | Description                                                                                                                                                                   | Type     | Default         |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------- |
@@ -117,7 +119,7 @@ Settings appear in the install/edit UI in the order below. `chart_type` and `kpi
 | `display_errors`     | Show errors on screen for debugging purposes                                                                                                                                  | optional | `false`         |
 | `refresh_interval`   | How often (in seconds) to refresh Shopify data                                                                                                                                | optional | `300`           |
 | `shop_domain`        | The myshopify.com domain of the store (e.g. `my-store.myshopify.com`). Testing/development only — in production the shop domain is provided by the Shopify integration.       | optional | —               |
-| `access_token`       | Admin API access token (testing/development only)                                                                                                                             | optional | —               |
+| `access_token`       | Resolved automatically via Shopify OAuth in production; set a raw Admin API token in `mock-data.yml` for local development. Not shown in the install/edit UI.                 | required | —               |
 | `override_timezone`  | Override the timezone for date display (e.g. `Europe/London`)                                                                                                                 | optional | system timezone |
 | `override_locale`    | Override the locale used for formatting (e.g. `en`, `fr`, `de`)                                                                                                               | optional | `en`            |
 
