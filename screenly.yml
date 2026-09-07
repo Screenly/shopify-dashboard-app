@@ -126,10 +126,10 @@ settings:
   access_token:
     type: secret
     title: Access Token
-    optional: true
+    optional: false
     help_text:
       properties:
-        help_text: For testing only. In production, the access token is fetched dynamically via the Screenly OAuth service.
+        help_text: Connect your Shopify store to display its data. For local testing, a raw access token can be pasted here instead.
         type: oauth:shopify:access_token
       schema_version: 1
   override_timezone:
