@@ -129,7 +129,7 @@ settings:
     optional: false
     help_text:
       properties:
-        help_text: Connect your Shopify store to display its data. For local testing, a raw access token can be pasted here instead.
+        help_text: Connect your Shopify store to display its data. For local development, set a raw access token in mock-data.yml instead.
         type: oauth:shopify:access_token
       schema_version: 1
   override_timezone:

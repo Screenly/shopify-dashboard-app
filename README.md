@@ -52,7 +52,7 @@ settings:
 
 ### Getting a test access token
 
-In production, `access_token` is resolved automatically by the Screenly OAuth service once Shopify is connected in the Screenly web console under Integrations (see `src/auth.ts`). It's `optional: false` and backed by `type: oauth:shopify:access_token` in the manifest, so real installs never show it as an editable field — Screenly's install/edit UI hides any setting with that OAuth-backed type unconditionally, regardless of `advanced`.
+In production, `access_token` is resolved automatically by the Screenly OAuth service once Shopify is connected in the Screenly web console under Integrations (see `src/auth.ts`). It's `optional: false` and its `help_text.properties.type` is `oauth:shopify:access_token` in the manifest, so real installs never show it as an editable field — Screenly's install/edit UI hides any setting with that OAuth-backed type unconditionally, regardless of `advanced`.
 
 For local development (`bun run dev`), set a raw access token directly in `mock-data.yml` instead, since the dev server reads settings from that file rather than going through the OAuth flow.
 
