@@ -1,3 +1,5 @@
+[![Version](https://img.shields.io/github/v/release/Screenly/shopify-dashboard-app)](https://github.com/Screenly/shopify-dashboard-app/releases/latest)
+
 # Shopify Dashboard App
 
 Displays Shopify store sales metrics on your Screenly digital signage screens. Choose from several single-purpose views — a KPI summary with recent orders, sales over time, sales by product, a sales breakdown, or a full-screen key metric — configurable per install via the `view` setting.
