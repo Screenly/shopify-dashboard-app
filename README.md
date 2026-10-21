@@ -1,3 +1,5 @@
+[![Version](https://img.shields.io/github/v/release/Screenly/shopify-dashboard-app)](https://github.com/Screenly/shopify-dashboard-app/releases/latest)
+
 # Shopify Dashboard App
 
 Displays Shopify store sales metrics on your Screenly digital signage screens. Choose from several single-purpose views — a KPI summary with recent orders, sales over time, sales by product, a sales breakdown, or a full-screen key metric — configurable per install via the `view` setting.
@@ -90,6 +92,22 @@ bun run format
 ```bash
 bun run deploy
 screenly edge-app instance create
+```
+
+### Releasing
+
+Pushes to `main` deploy to stage automatically. To release to production, tag a commit on `main` and push the tag (the workflow refuses tags not on `main`):
+
+```bash
+git checkout main && git pull
+git tag v26.10.0
+git push origin v26.10.0
+```
+
+Then publish a GitHub Release whose notes list the pull requests merged since the previous release. Add `--draft` to review the notes before publishing:
+
+```bash
+gh release create v26.10.0 --verify-tag --generate-notes --title v26.10.0
 ```
 
 ## Views
