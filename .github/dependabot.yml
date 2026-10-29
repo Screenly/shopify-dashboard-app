@@ -9,6 +9,12 @@ updates:
       bun:
         patterns:
           - '*'
+    ignore:
+      # typescript-eslint (used by @screenly/edge-apps lint) supports TypeScript <6.1;
+      # newer TypeScript versions break `bun run lint`. Remove once upstream supports it.
+      - dependency-name: 'typescript'
+        versions:
+          - '>=6.1'
 
   - package-ecosystem: 'github-actions'
     directory: '/'
